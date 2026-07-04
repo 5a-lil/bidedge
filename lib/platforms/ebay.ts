@@ -18,11 +18,13 @@ type EbaySummary = {
   imageUrl?: string | null;
   condition?: string | null;
   categories?: string[];
+  itemWebUrl?: string | null;
   seller?: { name?: string | null; feedbackPercentage?: number | null; feedbackScore?: number | null };
 };
 
 export type MarketEvaluation = {
   status: "ok" | "no_data";
+  basis?: "sold_90d" | "active_listings";
   median: number | null;
   low?: number;
   high?: number;
@@ -55,6 +57,7 @@ function toLotEvent(item: EbaySummary, category: string): LotEvent {
     title: item.title ?? "Lot eBay",
     platform: "ebay",
     imageUrl: item.imageUrl ?? undefined,
+    itemWebUrl: item.itemWebUrl ?? undefined,
     currentBid: item.currentBid ?? 0,
     currency: "EUR",
     bidCount: item.bidCount ?? 0,

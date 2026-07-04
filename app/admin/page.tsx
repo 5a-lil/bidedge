@@ -6,8 +6,10 @@ import { OrgTable } from "@/components/admin/OrgTable";
 export default function AdminOrgsPage() {
   return (
     <div className="animate-fade-up">
-      <h1 className="text-[28px] font-normal tracking-[-0.02em]">Organisations</h1>
-      <p className="mt-[5px] text-[13px] text-body">Gère les abonnements de tous les tenants.</p>
+      <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
+        Organisations
+      </h1>
+      <p className="mt-1.5 text-[13.5px] text-body">Gère les abonnements de tous les tenants.</p>
       <OrgTable />
     </div>
   );

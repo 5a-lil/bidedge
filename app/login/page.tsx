@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 import { useApp } from "@/lib/store";
 import { Toast } from "@/components/Toast";
 
-// Connexion — écran sombre plein écran, hors du layout (app) :
+// Connexion — écran clair plein écran, hors du layout (app) :
 // on hydrate le store et on monte le Toast nous-mêmes.
 
 export default function LoginPage() {
@@ -17,52 +17,40 @@ export default function LoginPage() {
   }, [hydrate]);
 
   return (
-    <div className="relative flex h-screen overflow-hidden bg-ink">
+    <div className="relative flex h-screen overflow-hidden bg-app">
       {/* Colonne gauche — promesse + cartes produit flottantes */}
       <div className="relative flex flex-[1.2] flex-col justify-center px-[84px]">
-        <div className="mb-10 text-[19px] font-bold tracking-[-0.01em] text-white">
-          Bid<span className="text-accent-dark">Edge</span>
+        <div className="mb-10 font-display text-[22px] font-medium tracking-[-0.01em] text-ink">
+          Bid<span className="text-accent-press">Edge</span>
         </div>
-        <h1 className="text-[52px] font-normal leading-[1.04] tracking-[-0.025em] text-white">
+        <h1 className="font-display text-[52px] font-normal leading-[1.08] tracking-[-0.01em] text-ink">
           L&apos;avantage,
           <br />
           à chaque enchère.
         </h1>
-        <p className="mt-5 max-w-[420px] text-[15.5px] leading-[1.55] text-dark-text">
+        <p className="mt-5 max-w-[420px] text-[15.5px] leading-[1.55] text-body">
           La cote du marché en continu, une suggestion au bon moment — et c&apos;est toujours toi
           qui enchéris.
         </p>
 
         {/* Carte "Enchère suggérée" */}
-        <div className="absolute bottom-[110px] left-[84px] w-[238px] animate-floaty rounded-[20px] border border-dark-border bg-dark-card p-4">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted">
-            Enchère suggérée
-          </div>
-          <div className="mb-[10px] mt-1 font-mono text-[26px] font-semibold text-accent-dark">
-            €100
-          </div>
+        <div className="absolute bottom-[110px] left-[84px] w-[238px] animate-floaty rounded-[20px] border border-hairline bg-white p-4 shadow-pop">
+          <div className="overline">Enchère suggérée</div>
+          <div className="mb-[10px] mt-1 font-mono text-[26px] font-semibold text-ink">€100</div>
           <div className="inline-flex h-[34px] items-center justify-center rounded-full bg-accent px-4 text-xs font-semibold text-white">
             Enchérir maintenant
           </div>
         </div>
 
         {/* Carte "Ton edge" */}
-        <div className="absolute bottom-[210px] left-[300px] w-[212px] animate-floaty2 rounded-[20px] border border-dark-border bg-dark-card p-4">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted">
-            Ton edge
-          </div>
+        <div className="absolute bottom-[210px] left-[300px] w-[212px] animate-floaty2 rounded-[20px] border border-hairline bg-white p-4 shadow-pop">
+          <div className="overline">Ton edge</div>
           <div className="relative mt-3 h-3">
-            <div className="absolute inset-x-0 top-[2px] h-2 rounded-full bg-dark-border" />
-            <div
-              className="absolute left-[38%] top-[2px] h-2 w-[52%] rounded-full"
-              style={{
-                background:
-                  "linear-gradient(90deg,rgba(63,182,183,.35),#3fb6b7 45%,rgba(63,182,183,.35))",
-              }}
-            />
-            <div className="absolute left-[12%] top-[-2px] h-3 w-3 rounded-full border-[2.5px] border-dark-card bg-accent-dark" />
+            <div className="absolute inset-x-0 top-[2px] h-2 rounded-full bg-control" />
+            <div className="absolute left-[38%] top-[2px] h-2 w-[52%] rounded-full bg-accent/25" />
+            <div className="absolute left-[12%] top-[-2px] h-3 w-3 rounded-full border-[2.5px] border-white bg-accent shadow-soft" />
           </div>
-          <div className="mt-[10px] font-mono text-xs text-accent-dark2">−62% vs cote</div>
+          <div className="mt-[10px] font-mono text-xs text-accent-press">−62% vs cote</div>
         </div>
       </div>
 
@@ -122,9 +110,11 @@ function LoginCard() {
 
   return (
     <div className="flex flex-1 items-center justify-center p-10">
-      <div className="flex w-[384px] animate-card-in flex-col gap-[14px] rounded-3xl border border-dark-border bg-dark-card p-8">
-        <div className="text-[22px] font-normal tracking-[-0.02em] text-white">Connexion</div>
-        <div className="-mt-2 text-[13px] text-dark-text">
+      <div className="flex w-[384px] animate-card-in flex-col gap-[14px] rounded-3xl border border-hairline bg-white p-8 shadow-pop">
+        <div className="font-display text-[26px] font-normal tracking-[-0.01em] text-ink">
+          Connexion
+        </div>
+        <div className="-mt-2 text-[13px] text-body">
           Reprends la chasse là où tu l&apos;as laissée.
         </div>
         <input
@@ -136,7 +126,7 @@ function LoginCard() {
           placeholder="E-mail"
           type="email"
           autoComplete="email"
-          className="h-[46px] rounded-xl border border-dark-input-border bg-dark-input px-4 text-sm text-white"
+          className="h-12 rounded-xl border border-hairline bg-white px-4 text-sm text-ink"
         />
         <input
           value={password}
@@ -150,29 +140,29 @@ function LoginCard() {
           placeholder="Mot de passe"
           type="password"
           autoComplete="current-password"
-          className="h-[46px] rounded-xl border border-dark-input-border bg-dark-input px-4 text-sm text-white"
+          className="h-12 rounded-xl border border-hairline bg-white px-4 text-sm text-ink"
         />
         {error && <div className="-mt-1 text-[13px] leading-snug text-down">{error}</div>}
         <motion.button
-          whileTap={{ scale: 0.96 }}
+          whileTap={{ scale: 0.97 }}
           onClick={submit}
           disabled={loading}
-          className="flex h-[46px] cursor-pointer items-center justify-center rounded-full bg-accent text-[14.5px] font-semibold text-white transition-colors hover:bg-accent-press disabled:cursor-not-allowed disabled:bg-accent-disabled"
+          className="flex h-12 cursor-pointer items-center justify-center rounded-full bg-accent text-[14.5px] font-semibold text-white shadow-cta transition-colors hover:bg-accent-press disabled:cursor-not-allowed disabled:bg-accent-disabled disabled:shadow-none"
         >
           {loading ? "Connexion…" : "Se connecter"}
         </motion.button>
-        <div className="flex items-center gap-3 text-xs text-[#3c4046]">
-          <span className="h-px flex-1 bg-dark-border" />
+        <div className="flex items-center gap-3 text-xs text-muted">
+          <span className="h-px flex-1 bg-hairline" />
           ou
-          <span className="h-px flex-1 bg-dark-border" />
+          <span className="h-px flex-1 bg-hairline" />
         </div>
         <button
           onClick={() => router.push("/onboarding")}
-          className="cursor-pointer text-center text-[13.5px] font-semibold text-accent-dark transition-colors hover:text-[#6fd0d0]"
+          className="cursor-pointer text-center text-[13.5px] font-semibold text-accent transition-colors hover:text-accent-press"
         >
           Créer un compte →
         </button>
-        <div className="mt-[6px] text-center text-[11px] text-body">
+        <div className="mt-[6px] text-center text-[11px] text-muted">
           Essai Pro 14 jours · sans carte bancaire
         </div>
       </div>

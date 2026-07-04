@@ -8,12 +8,20 @@ import { useApp } from "@/lib/store";
 // Journal — la mémoire des décisions. Chaque motif appris est réinjecté
 // dans les advisories suivantes : le copilote s'adapte, l'humain décide.
 
-function badgeOf(e: JournalEntry): { label: string; className: string } {
+function badgeOf(e: JournalEntry): { text: string; price: string | null; className: string } {
   if (e.outcome === "won")
-    return { label: `Gagné · ${e.price != null ? euro(e.price) : "—"}`, className: "bg-up-tint text-up-strong" };
+    return {
+      text: "Gagné ·",
+      price: e.price != null ? euro(e.price) : "—",
+      className: "bg-up-tint text-up-strong",
+    };
   if (e.outcome === "lost")
-    return { label: `Perdu · parti ${e.price != null ? euro(e.price) : "—"}`, className: "bg-down-tint text-down" };
-  return { label: "Passé", className: "bg-control text-body" };
+    return {
+      text: "Perdu · parti",
+      price: e.price != null ? euro(e.price) : "—",
+      className: "bg-down-tint text-down",
+    };
+  return { text: "Passé", price: null, className: "bg-control text-body" };
 }
 
 export default function JournalPage() {
@@ -23,15 +31,19 @@ export default function JournalPage() {
   return (
     <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-[26px]">
       {/* header */}
-      <div className="flex items-baseline gap-3">
-        <span className="text-[28px] font-normal tracking-[-0.02em]">Journal</span>
+      <div className="overline">Tes décisions nourrissent chaque advisory</div>
+      <div className="mt-2 flex items-baseline gap-3">
+        <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
+          Journal
+        </h1>
         <span className="text-[13px] text-body">
-          {journal.length} décisions · {wonCount} {wonCount > 1 ? "gagnées" : "gagnée"}
+          <span className="font-mono">{journal.length}</span> décisions ·{" "}
+          <span className="font-mono">{wonCount}</span> {wonCount > 1 ? "gagnées" : "gagnée"}
         </span>
       </div>
 
       {/* décisions */}
-      <div className="mt-4 rounded-[18px] bg-white px-[18px] py-1 shadow-card">
+      <div className="mt-5 rounded-3xl border border-hairline bg-white px-6 py-2 shadow-card">
         {journal.map((e) => {
           const badge = badgeOf(e);
           return (
@@ -40,27 +52,28 @@ export default function JournalPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="flex items-center gap-3.5 border-b border-control py-[13px]"
+              className="flex items-center gap-3.5 border-b border-hairline py-[13px] last:border-b-0"
             >
-              <div className="h-11 w-11 flex-none rounded-[11px]" style={{ background: e.gradient }} />
+              <div className="h-11 w-11 flex-none rounded-xl" style={{ background: e.gradient }} />
               <div className="w-[215px] flex-none">
-                <div className="text-[13.5px] font-semibold">{e.lotTitle}</div>
+                <div className="text-[13.5px] font-semibold text-ink">{e.lotTitle}</div>
                 <div className="text-[11.5px] text-muted">{e.meta}</div>
               </div>
-              <span className="flex-1 rounded-[9px] bg-accent-tint px-[11px] py-[7px] text-xs text-accent-press">
+              <span className="flex-1 rounded-lg bg-accent-tint px-[11px] py-[7px] text-xs text-accent-press">
                 {e.learn}
               </span>
               <span
-                className={`inline-flex items-center rounded-full px-[13px] py-1.5 text-xs font-bold ${badge.className}`}
+                className={`inline-flex items-center gap-1 rounded-full px-[13px] py-1.5 text-xs font-semibold ${badge.className}`}
               >
-                <span className="font-mono">{badge.label}</span>
+                {badge.text}
+                {badge.price != null && <span className="font-mono">{badge.price}</span>}
               </span>
             </motion.div>
           );
         })}
       </div>
 
-      <div className="mt-3.5 rounded-[14px] bg-accent-tint px-4 py-[13px] text-[12.5px] text-accent-press">
+      <div className="mt-4 rounded-2xl bg-accent-tint px-5 py-3.5 text-[12.5px] text-accent-press">
         {"Ces motifs sont réinjectés dans chaque advisory — « tu as tenu sous €240 la dernière fois, je suggère €220 ici »."}
       </div>
     </div>

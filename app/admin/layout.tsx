@@ -5,7 +5,7 @@ import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 
 // Panel super-admin plateforme — route top-level, hors du groupe (app) :
 // pas de sidebar radar ni de simulateur. Garde d'accès stricte : seul un
-// opérateur BidEdge (super-admin) entre ici. Chrome sobre, barre sombre.
+// opérateur BidEdge (super-admin) entre ici. Chrome sobre, barre claire.
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -16,11 +16,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen flex-col bg-app text-ink">
-      <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-dark-border bg-ink px-6">
-        <span className="text-[16px] font-bold tracking-[-0.01em] text-white">
-          Bid<span className="text-accent-dark">Edge</span>
+      <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-hairline bg-white px-6">
+        <span className="font-display text-[18px] font-medium tracking-[-0.01em] text-ink">
+          Bid<span className="text-accent">Edge</span>
         </span>
-        <span className="inline-flex items-center rounded-full border border-dark-border bg-dark-card px-3 py-1 text-[11px] font-semibold tracking-[.01em] text-accent-dark">
+        <span className="inline-flex items-center rounded-full bg-ink px-3 py-1 text-[11px] font-semibold tracking-[.02em] text-white">
           Admin plateforme
         </span>
 
@@ -28,16 +28,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <Link
           href="/"
-          className="text-[13px] font-semibold text-dark-text transition-colors hover:text-white"
+          className="text-[13px] font-semibold text-body transition-colors hover:text-ink"
         >
           ← Retour à l&apos;app
         </Link>
 
         <span className="flex items-center gap-2.5 pl-1">
-          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-dark-card text-[12.5px] font-bold text-accent-dark">
+          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-accent-tint text-[12.5px] font-semibold text-accent-press">
             {initial}
           </span>
-          <span className="hidden text-[13px] font-semibold text-white sm:inline">{user.name}</span>
+          <span className="hidden text-[13px] font-semibold text-body sm:inline">{user.name}</span>
         </span>
 
         <AdminLogoutButton />

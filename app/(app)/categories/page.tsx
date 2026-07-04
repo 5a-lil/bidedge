@@ -1,406 +1,331 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import type { ScanProgress } from "@/lib/contracts";
-import { edgeOf, euro, fmtEdge } from "@/lib/format";
+import type { LotEvent } from "@/lib/contracts";
+import { euro, fmtEdge } from "@/lib/format";
 import { useApp } from "@/lib/store";
+import { CoteBand } from "@/components/CoteBand";
 
-// Catégories scannées — la cote comme objet visuel, pas comme tableau.
-// L'utilisateur dit quoi chasser ; BidEdge établit la fourchette fiable.
+// Catégories — la cote réelle de chaque type de produit monitoré (eBay).
+// La liste est PARTAGÉE avec le radar (store.categories) : ajouter une
+// catégorie ici lance son monitoring partout. Chaque carte établit la cote
+// (médiane + fourchette fiable) et pointe les meilleures opportunités.
 
-type AddedCat = { name: string; slug: string; scan: ScanProgress | null };
+type MonitorLot = LotEvent & { edgePct: number | null; belowMarket: boolean };
 
-const SCAN_STEP_LABELS: Record<ScanProgress["step"], string> = {
-  "past-sales": "ventes passées…",
-  "live-search": "recherche live des annonces…",
-  calibration: "calibration de la cote…",
-  done: "terminé",
+type MonitorResult = {
+  query: string;
+  median: number | null;
+  basis: "sold_90d" | "active_listings" | null;
+  sampleSize: number;
+  reliableRange: [number, number] | null;
+  low: number | null;
+  high: number | null;
+  maxProfitableBid: number | null;
+  count: number;
+  lots: MonitorLot[];
 };
 
-/** "Objectifs M42" → "objectifs-m42" (minuscules, accents retirés, espaces → "-") */
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
-function CoteBadge() {
-  return (
-    <span className="inline-flex items-center rounded-full bg-accent-tint px-[11px] py-1 text-[11.5px] font-bold text-accent-press">
-      Cote établie
-    </span>
-  );
-}
+const BASIS_LABEL: Record<string, string> = {
+  sold_90d: "ventes conclues · 90 j",
+  active_listings: "annonces actives",
+};
 
 export default function CategoriesPage() {
-  const hot = useApp((s) => s.hot);
-  const scans = useApp((s) => s.scans);
-  const ramScan = scans["ram-ddr5"];
+  const hydrated = useApp((s) => s.hydrated);
+  const categories = useApp((s) => s.categories);
+  const setCategories = useApp((s) => s.setCategories);
   const notify = useApp((s) => s.notify);
 
-  const [catInput, setCatInput] = useState("");
-  const [alertOn, setAlertOn] = useState(true);
-  const [added, setAdded] = useState<AddedCat[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([
-    "Game Boy DMG",
-    "Claviers mécaniques vintage",
-    "Objectifs M42",
-  ]);
+  const [input, setInput] = useState("");
+  const [results, setResults] = useState<Record<string, MonitorResult | "error">>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
 
-  const sources = useRef<Map<string, EventSource>>(new Map());
-
-  useEffect(() => {
-    const map = sources.current;
-    return () => {
-      for (const es of map.values()) es.close();
-      map.clear();
-    };
+  const fetchType = useCallback(async (type: string) => {
+    setLoading((l) => ({ ...l, [type]: true }));
+    try {
+      const res = await fetch(`/api/monitor?q=${encodeURIComponent(type)}`);
+      if (!res.ok) throw new Error();
+      const data = (await res.json()) as MonitorResult;
+      setResults((r) => ({ ...r, [type]: data }));
+    } catch {
+      setResults((r) => ({ ...r, [type]: "error" }));
+    } finally {
+      setLoading((l) => ({ ...l, [type]: false }));
+    }
   }, []);
 
-  const addCategory = (raw: string) => {
-    const name = raw.trim();
-    if (!name) return;
-    const slug = slugify(name);
-    setSuggestions((prev) => prev.filter((s) => s !== name));
-    setCatInput("");
-    notify("Scan lancé : " + name);
-    if (sources.current.has(slug)) return;
-    setAdded((prev) => (prev.some((c) => c.slug === slug) ? prev : [...prev, { name, slug, scan: null }]));
+  useEffect(() => {
+    if (!hydrated) return;
+    for (const t of categories) if (!results[t]) fetchType(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, categories.join("|")]);
 
-    const es = new EventSource(`/api/scan?category=${encodeURIComponent(slug)}&label=${encodeURIComponent(name)}`);
-    sources.current.set(slug, es);
-    es.addEventListener("scan", (e) => {
-      try {
-        const data = JSON.parse((e as MessageEvent<string>).data) as ScanProgress;
-        setAdded((prev) => prev.map((c) => (c.slug === slug ? { ...c, scan: data } : c)));
-        if (data.step === "done") {
-          es.close();
-          sources.current.delete(slug);
-        }
-      } catch {
-        // event illisible — on attend le suivant
-      }
-    });
-  };
-
-  const addFromInput = () => {
-    if (!catInput.trim()) {
+  const addCategory = () => {
+    const t = input.trim();
+    if (!t) {
       notify("Nomme une catégorie d'abord");
       return;
     }
-    addCategory(catInput);
+    if (categories.some((c) => c.toLowerCase() === t.toLowerCase())) {
+      notify("Cette catégorie est déjà scannée");
+      setInput("");
+      return;
+    }
+    setCategories([...categories, t]);
+    setInput("");
+    notify(`Scan lancé : ${t}`);
   };
 
-  const toggleAlert = () => {
-    notify(alertOn ? "Alerte désactivée" : "Alerte activée");
-    setAlertOn(!alertOn);
+  const removeCategory = (t: string) => {
+    setCategories(categories.filter((c) => c !== t));
+    setResults((r) => {
+      const n = { ...r };
+      delete n[t];
+      return n;
+    });
+    notify(`« ${t} » retirée du radar`);
   };
-
-  // — carte Seiko : le lot en direct alimente le point sur la bande —
-  const bid = hot?.currentBid ?? 95;
-
-  // — carte RAM : pilotée par le flux SSE —
-  const ramPct = Math.round(ramScan?.pct ?? 34);
-  const ramDone = ramScan?.step === "done";
-  const ramSales = ramScan?.pastSalesCount ?? 214;
-  const ramMin = Math.max(1, Math.round((100 - ramPct) / 50));
-  const ramBand = ramScan?.band;
-
-  // — catégories ajoutées : le store (alimenté par le flux SSE global) est la
-  // source de vérité — les cartes survivent aux allers-retours radar ↔ ici.
-  // L'état local ne sert qu'au placeholder « en file d'attente… » avant le
-  // premier event de scan.
-  const addedCards: AddedCat[] = [
-    ...Object.values(scans)
-      .filter((s) => s.category !== "ram-ddr5")
-      .map((s) => ({ name: s.label, slug: s.category, scan: s })),
-    ...added.filter((c) => !scans[c.slug]),
-  ];
-  const visibleSuggestions = suggestions.filter((name) => !scans[slugify(name)]);
 
   return (
-    <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-[26px]">
-      <div className="text-[28px] font-normal tracking-[-0.02em]">Catégories scannées</div>
-      <div className="mt-[5px] text-[13px] text-body">
-        Dis quoi chasser — BidEdge établit la cote via les ventes passées et une recherche live.
+    <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-7">
+      <h1 className="font-display text-[32px] font-normal tracking-[-0.01em]">Catégories scannées</h1>
+      <div className="mt-1.5 text-[13.5px] text-body">
+        Dis quoi chasser — BidEdge interroge eBay et établit la cote du marché en direct.
       </div>
 
       {/* ajout */}
-      <div className="mt-[18px] flex gap-2.5">
+      <div className="mt-5 flex gap-2.5">
         <input
-          value={catInput}
-          onChange={(e) => setCatInput(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") addFromInput();
+            if (e.key === "Enter") addCategory();
           }}
-          placeholder="Ajouter une catégorie… ex. « montres Seiko vintage »"
-          className="h-11 flex-1 rounded-full border border-hairline bg-white px-5 text-[13.5px] text-ink"
+          placeholder="Ajouter une catégorie… ex. « casque hi-fi vintage »"
+          className="h-11 flex-1 rounded-full border border-hairline bg-white px-5 text-[13.5px] text-ink shadow-soft placeholder:text-muted"
         />
         <motion.button
           whileTap={{ scale: 0.96 }}
-          onClick={addFromInput}
-          className="inline-flex h-11 items-center rounded-full bg-accent px-[22px] text-[13.5px] font-semibold text-white transition-colors hover:bg-accent-press"
+          onClick={addCategory}
+          className="inline-flex h-11 items-center rounded-full bg-accent px-6 text-[13.5px] font-semibold text-white shadow-cta transition-colors hover:bg-accent-press"
         >
           Scanner
         </motion.button>
       </div>
 
-      {/* ===== carte Seiko — la viz de cote signature ===== */}
-      <div className="mt-4 flex flex-col gap-[13px] rounded-[18px] bg-white px-5 py-[18px] shadow-card">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-[15px] font-semibold">Montres Seiko vintage</span>
-          <CoteBadge />
-          <span className="inline-flex items-center rounded-full bg-up-tint px-2.5 py-1 text-[11px] font-bold text-up-strong">
-            cote +8% sur 3 mois
-          </span>
-          <span className="flex-1" />
-          <span className="text-xs text-muted">124 ventes analysées · maj il y a 3 min</span>
-        </div>
-
-        <div className="flex gap-5">
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            {/* rangée haute : fourchette + médiane */}
-            <div className="relative h-[70px]">
-              <span className="absolute left-[26%] top-5 -translate-x-1/2 font-mono text-[13px] font-medium">€180</span>
-              <span className="absolute left-[46%] top-0 -translate-x-1/2 text-center leading-[1.05]">
-                <span className="font-mono text-[20px] font-semibold text-accent-press">€280</span>
-                <br />
-                <span className="text-[9px] font-semibold uppercase tracking-[.07em] text-muted">médiane</span>
-              </span>
-              <span className="absolute left-[74%] top-5 -translate-x-1/2 font-mono text-[13px] font-medium">€420</span>
-              <div className="absolute inset-x-0 top-[50px] h-[14px] rounded-full bg-control" />
-              <div
-                className="absolute left-[26%] top-[50px] h-[14px] w-[48%] rounded-full"
-                style={{ background: "linear-gradient(90deg,rgba(20,120,121,.3),#147879 42%,rgba(20,120,121,.3))" }}
-              />
-              <div className="absolute left-[46%] top-[44px] h-[26px] w-[2.5px] rounded-[2px] bg-accent-press" />
-            </div>
-            {/* rangée basse : le lot live pointé sur la bande */}
-            <div className="relative h-14">
-              <div className="absolute left-[9%] top-0 h-4 w-0.5 bg-accent" />
-              <div className="absolute left-[9%] top-[13px] h-[13px] w-[13px] -translate-x-[45%] rounded-full border-[2.5px] border-white bg-accent shadow-[0_1px_4px_rgba(0,0,0,.25)]" />
-              <span className="absolute left-[3%] top-[34px] whitespace-nowrap text-[11px] font-semibold">
-                Seiko 6139 · live <span className="font-mono">{euro(bid)}</span>
-              </span>
-              <span className="absolute left-[13.5%] top-[19px] w-[11.5%] border-t-[1.5px] border-dashed border-[rgba(20,120,121,.6)]" />
-              <span className="absolute left-[25%] top-[13px] text-[10px] text-[rgba(20,120,121,.85)]">›</span>
-              <span className="absolute left-[26.8%] top-2 inline-flex items-center rounded-full bg-up-tint px-[11px] py-[3px] text-[11.5px] font-bold text-up-strong">
-                ton edge ·&nbsp;{fmtEdge(edgeOf(bid, 280))}
-              </span>
-            </div>
-            <div className="text-[11px] text-muted">
-              la zone teal = ce que le marché paie (124 ventes) · le point = le lot en direct
-            </div>
-          </div>
-
-          <div className="flex w-[180px] flex-none flex-col gap-[5px] text-[11.5px] text-body">
-            <span>
-              <span className="font-mono">€180–420</span> fourchette fiable
-            </span>
-            <span>
-              eBay <span className="font-mono">78</span> · Catawiki <span className="font-mono">32</span> · Drouot{" "}
-              <span className="font-mono">14</span>
-            </span>
-            <Link href="/" className="font-semibold text-accent transition-colors hover:text-accent-press">
-              9 lots actifs au radar →
-            </Link>
-          </div>
-        </div>
-
-        {/* sous-modèles */}
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-full bg-app px-3 py-[5px] text-xs font-medium text-body">
-            6139 chrono ·&nbsp;<span className="font-mono">€240–320</span>
-          </span>
-          <span className="inline-flex items-center rounded-full bg-app px-3 py-[5px] text-xs font-medium text-body">
-            SKX007 ·&nbsp;<span className="font-mono">€110–160</span>
-          </span>
-          <span className="inline-flex items-center rounded-full bg-app px-3 py-[5px] text-xs font-medium text-body">
-            6105 diver ·&nbsp;<span className="font-mono">€600–900</span>
-          </span>
-          <button
-            onClick={() => notify("Bientôt disponible")}
-            className="inline-flex items-center rounded-full bg-app px-3 py-[5px] text-xs font-medium text-body transition-colors hover:bg-control"
-          >
-            5 sous-modèles ▾
-          </button>
-        </div>
-
-        <div className="h-px bg-control" />
-
-        {/* alerte */}
-        <div className="flex items-center gap-[11px] text-[12.5px]">
-          <button
-            onClick={toggleAlert}
-            aria-pressed={alertOn}
-            className="relative h-[21px] w-9 flex-none rounded-full transition-colors duration-200"
-            style={{ background: alertOn ? "#147879" : "#c7ccd3" }}
-          >
-            <span
-              className="absolute top-0.5 h-[17px] w-[17px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.25)] transition-[left] duration-200"
-              style={{ left: alertOn ? 17 : 2 }}
-            />
-          </button>
-          <span>
-            M&apos;alerter quand un lot passe sous <b>−30%</b> de la cote
-          </span>
-          <span className="flex-1" />
-          <button
-            onClick={() => notify("Bientôt disponible")}
-            className="text-xs text-muted transition-colors hover:text-ink"
-          >
-            Pause · Retirer
-          </button>
-        </div>
-      </div>
-
-      {/* ===== carte RAM — scan en direct via SSE ===== */}
-      <div className="mt-3.5 flex flex-col gap-[11px] rounded-[18px] bg-white px-5 py-[18px] shadow-card">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[15px] font-semibold">RAM DDR5 / composants</span>
-          {ramDone ? (
-            <CoteBadge />
-          ) : (
-            <span className="inline-flex items-center rounded-full bg-control px-[11px] py-1 text-[11.5px] font-semibold text-body">
-              Scan en cours…
-            </span>
-          )}
-          <span className="flex-1" />
-          {ramDone ? (
-            <span className="text-xs text-muted">{ramSales} ventes analysées · à l&apos;instant</span>
-          ) : (
-            <span className="text-xs text-muted">
-              <span className="font-mono">{ramPct}%</span> · ~<span className="font-mono">{ramMin}</span> min
-            </span>
-          )}
-        </div>
-
-        {ramDone ? (
-          <div className="flex animate-fade-up items-baseline gap-2.5">
-            <span className="font-mono text-[15px] font-medium">
-              {euro(ramBand?.low ?? 120)} – {euro(ramBand?.high ?? 160)}
-            </span>
-            <span className="text-xs text-muted">
-              médiane <span className="font-mono">{euro(ramBand?.median ?? 140)}</span>
-            </span>
-            <span className="flex-1" />
-            <span className="text-xs text-muted">{(ramBand?.sources ?? ["eBay", "Catawiki"]).join(" · ")}</span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-[7px] text-[12.5px]">
-            <div className="flex items-center gap-[9px]">
-              <span className="text-up-strong">✓</span>
-              <span>
-                Ventes passées collectées — <span className="font-mono">{ramSales}</span> transactions
-              </span>
-            </div>
-            <div className="flex items-center gap-[9px]">
-              <span className="text-accent">▶</span>
-              <span>Recherche live des annonces (eBay)</span>
-              <span className="h-1.5 max-w-[170px] flex-1 overflow-hidden rounded-full bg-control">
-                <span
-                  className="block h-full bg-accent transition-[width] duration-1000 ease-linear"
-                  style={{ width: `${ramPct}%` }}
-                />
-              </span>
-            </div>
-            <div className="flex items-center gap-[9px] text-muted">
-              <span>·</span>
-              <span>Calibration de la cote (comparaison des sources)</span>
-            </div>
+      {/* cartes de cote */}
+      <div className="mt-5 flex flex-col gap-4 pb-6">
+        {categories.map((type) => (
+          <CategoryCard
+            key={type}
+            type={type}
+            result={results[type]}
+            loading={!!loading[type]}
+            onRemove={() => removeCategory(type)}
+            onRetry={() => fetchType(type)}
+          />
+        ))}
+        {categories.length === 0 && (
+          <div className="mt-8 text-center text-[13.5px] text-body">
+            Aucune catégorie scannée — ajoute un type de produit ci-dessus.
           </div>
         )}
       </div>
 
-      {/* ===== carte GPU — compacte ===== */}
-      <div className="mt-3.5 flex items-center gap-2.5 rounded-[18px] bg-white px-5 py-[15px] shadow-card">
-        <span className="text-[15px] font-semibold">GPU / cartes graphiques</span>
-        <CoteBadge />
-        <span className="text-xs text-muted">
-          <span className="font-mono">€310–780</span> · médiane <span className="font-mono">€540</span> · 89 ventes
-        </span>
+      <div className="mb-2 text-[11.5px] text-muted">
+        Le scan propose, toi tu choisis — chaque enchère se place sur eBay, de ta main. Jamais d&apos;autobid.
+      </div>
+    </div>
+  );
+}
+
+function CategoryCard({
+  type,
+  result,
+  loading,
+  onRemove,
+  onRetry,
+}: {
+  type: string;
+  result: MonitorResult | "error" | undefined;
+  loading: boolean;
+  onRemove: () => void;
+  onRetry: () => void;
+}) {
+  const notify = useApp((s) => s.notify);
+  const [alertOn, setAlertOn] = useState(true);
+
+  const r = result !== "error" ? result : undefined;
+  const hasCote = !!r && r.median != null && r.low != null && r.high != null;
+
+  // la bande = fourchette FIABLE (p25–p75) — le min/max absolu des annonces
+  // (1 € de départ, prix délirants) écraserait la viz ; l'échelle s'étend
+  // autour de la fourchette fiable.
+  const band: [number, number] = hasCote ? (r!.reliableRange ?? [r!.low!, r!.high!]) : [0, 1];
+  const scaleMin = band[0] * 0.6;
+  const scaleMax = band[1] * 1.35;
+  const pct = (v: number) => Math.max(2, Math.min(98, ((v - scaleMin) / (scaleMax - scaleMin)) * 100));
+
+  const opportunities = r?.lots.filter((l) => l.belowMarket) ?? [];
+  const best = opportunities
+    .filter((l) => l.currentBid > 0)
+    .sort((a, b) => (a.edgePct ?? 0) - (b.edgePct ?? 0))
+    .slice(0, 3);
+  const pin = best[0];
+
+  return (
+    <div className="flex animate-fade-up flex-col gap-4 rounded-3xl border border-hairline bg-white px-6 py-5 shadow-card">
+      {/* header */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="font-display text-[19px] font-medium tracking-[-0.01em]">{type}</span>
+        {hasCote && (
+          <span className="inline-flex items-center rounded-full bg-accent-tint px-3 py-1 text-[11px] font-bold text-accent-press">
+            Cote établie
+          </span>
+        )}
+        {loading && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-control px-3 py-1 text-[11px] font-semibold text-body">
+            <span className="h-1.5 w-1.5 animate-blink rounded-full bg-accent" />
+            scan en cours…
+          </span>
+        )}
+        {r?.basis && (
+          <span className="inline-flex items-center rounded-full border border-hairline bg-app px-2.5 py-1 text-[10.5px] font-medium text-muted">
+            {BASIS_LABEL[r.basis] ?? r.basis}
+          </span>
+        )}
         <span className="flex-1" />
-        <button
-          onClick={() => notify("Bientôt disponible")}
-          className="text-xs text-muted transition-colors hover:text-ink"
-        >
-          détails ▾
+        {r && (
+          <span className="text-xs text-muted">
+            <span className="font-mono">{r.sampleSize}</span> comparables · à l&apos;instant
+          </span>
+        )}
+        <button onClick={onRemove} className="text-xs font-semibold text-muted transition-colors hover:text-down">
+          Retirer
         </button>
       </div>
 
-      {/* ===== catégories ajoutées ===== */}
-      {addedCards.map((c) => {
-        const done = c.scan?.step === "done";
-        return (
-          <div
-            key={done ? `${c.slug}-done` : c.slug}
-            className="mt-3.5 flex animate-fade-up items-center gap-2.5 rounded-[18px] bg-white px-5 py-[15px] shadow-card"
-          >
-            <span className="text-[15px] font-semibold">{c.name}</span>
-            {done && c.scan ? (
-              <>
-                <CoteBadge />
-                <span className="text-xs text-muted">
-                  <span className="font-mono">
-                    {euro(c.scan.band?.low ?? 0)} – {euro(c.scan.band?.high ?? 0)}
-                  </span>{" "}
-                  · médiane <span className="font-mono">{euro(c.scan.band?.median ?? 0)}</span>
-                </span>
-                <span className="flex-1" />
-                <span className="text-xs text-muted">{c.scan.pastSalesCount} ventes analysées · à l&apos;instant</span>
-              </>
-            ) : c.scan ? (
-              <>
-                <span className="inline-flex items-center rounded-full bg-control px-[11px] py-1 text-[11.5px] font-semibold text-body">
-                  Scan en cours…
-                </span>
-                <span className="text-xs text-muted">{SCAN_STEP_LABELS[c.scan.step]}</span>
-                <span className="flex-1" />
-                <span className="font-mono text-xs text-muted">{Math.round(c.scan.pct)}%</span>
-                <span className="h-1.5 w-[130px] overflow-hidden rounded-full bg-control">
-                  <span
-                    className="block h-full rounded-full bg-accent transition-[width] duration-1000 ease-linear"
-                    style={{ width: `${Math.round(c.scan.pct)}%` }}
-                  />
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="inline-flex items-center rounded-full bg-control px-[11px] py-1 text-[11.5px] font-semibold text-body">
-                  en file d&apos;attente…
-                </span>
-                <span className="flex-1" />
-                <span className="relative h-1.5 w-[130px] overflow-hidden rounded-full bg-control">
-                  <span
-                    className="absolute left-0 top-0 h-full w-2/5 animate-slide-bar rounded-full"
-                    style={{ background: "linear-gradient(90deg,transparent,#147879,transparent)" }}
-                  />
-                </span>
-              </>
-            )}
-          </div>
-        );
-      })}
+      {result === "error" && (
+        <div className="flex items-center gap-3 rounded-2xl bg-control px-4 py-3 text-[13px] text-body">
+          Cote indisponible — vérifie que le service eBay tourne (ebay-service).
+          <button onClick={onRetry} className="font-semibold text-accent-press hover:underline">
+            Réessayer
+          </button>
+        </div>
+      )}
 
-      {/* ===== suggestions ===== */}
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-body">
-        <span className="text-muted">Suggestions, d&apos;après ton journal :</span>
-        {visibleSuggestions.map((name) => (
-          <motion.button
-            key={name}
-            whileTap={{ scale: 0.96 }}
-            onClick={() => addCategory(name)}
-            className="inline-flex items-center rounded-full border border-dashed border-[#c9ced6] bg-white px-[13px] py-1.5 text-xs font-medium text-body transition-colors hover:border-accent hover:text-accent-press"
-          >
-            + {name}
-          </motion.button>
-        ))}
-      </div>
+      {loading && !r && (
+        <div className="h-[76px] animate-pulse rounded-2xl bg-control" />
+      )}
+
+      {hasCote && r && (
+        <div className="flex gap-8">
+          {/* viz signature */}
+          <div className="min-w-0 flex-1">
+            <CoteBand
+              bandLeftPct={pct(band[0])}
+              bandWidthPct={Math.max(4, pct(band[1]) - pct(band[0]))}
+              medianPct={pct(r.median!)}
+              medianLabel={euro(r.median!)}
+              lowPct={pct(band[0])}
+              lowLabel={euro(band[0])}
+              highPct={pct(band[1])}
+              highLabel={euro(band[1])}
+              pin={
+                pin
+                  ? { pct: pct(Math.max(scaleMin, pin.currentBid)), label: `meilleur lot · ${euro(pin.currentBid)}` }
+                  : undefined
+              }
+              className="mt-1"
+            />
+            <div className="mt-2 text-[11px] text-muted">
+              la zone teal = ce que le marché paie · le point = la meilleure enchère en cours
+            </div>
+          </div>
+
+          {/* colonne décision */}
+          <div className="flex w-[220px] flex-none flex-col gap-1.5 text-[12.5px] text-body">
+            <span>
+              <span className="font-mono font-semibold text-ink">
+                €{Math.round(band[0])}–{Math.round(band[1])}
+              </span>{" "}
+              fourchette fiable
+            </span>
+            {r.maxProfitableBid != null && (
+              <span>
+                rentable jusqu&apos;à{" "}
+                <span className="font-mono font-semibold text-accent-press">{euro(r.maxProfitableBid)}</span>
+              </span>
+            )}
+            <span>
+              <span className="font-mono">{r.count}</span> enchères actives ·{" "}
+              <span className="font-mono font-semibold text-up-strong">{opportunities.length}</span> sous la cote
+            </span>
+            <Link href="/" className="mt-1 font-semibold text-accent transition-colors hover:text-accent-press">
+              voir au radar →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* meilleures opportunités */}
+      {best.length > 0 && (
+        <div className="flex flex-col">
+          <span className="overline mb-1">Meilleures opportunités</span>
+          {best.map((l, i) => (
+            <div key={l.lotId}>
+              {i > 0 && <div className="h-px bg-control" />}
+              <div className="flex items-center gap-3 py-2 text-[12.5px]">
+                <span className="min-w-0 flex-1 truncate">{l.title}</span>
+                <span className="font-mono font-semibold">{euro(l.currentBid)}</span>
+                {l.edgePct != null && (
+                  <span className="inline-flex w-14 justify-end font-mono text-[11px] font-semibold text-up-strong">
+                    {fmtEdge(l.edgePct)}
+                  </span>
+                )}
+                {l.itemWebUrl && (
+                  <a
+                    href={l.itemWebUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-semibold text-accent transition-colors hover:text-accent-press"
+                  >
+                    ouvrir →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {hasCote && (
+        <>
+          <div className="h-px bg-control" />
+          <div className="flex items-center gap-3 text-[12.5px]">
+            <button
+              onClick={() => {
+                notify(alertOn ? "Alerte désactivée" : "Alerte activée");
+                setAlertOn(!alertOn);
+              }}
+              aria-pressed={alertOn}
+              className="relative h-[21px] w-9 flex-none rounded-full transition-colors duration-200"
+              style={{ background: alertOn ? "#147879" : "#cfccc3" }}
+            >
+              <span
+                className="absolute top-0.5 h-[17px] w-[17px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,.25)] transition-[left] duration-200"
+                style={{ left: alertOn ? 17 : 2 }}
+              />
+            </button>
+            <span>
+              M&apos;alerter quand un lot passe sous <b>−30%</b> de la cote
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -183,8 +183,8 @@ export function Sidebar() {
   return (
     <div className="flex w-56 flex-none flex-col border-r border-hairline bg-white px-3 pb-3.5 pt-[18px]">
       <div className="flex items-center gap-2 px-2.5 pb-5 pt-0.5">
-        <Link href="/" className="text-[17px] font-bold tracking-[-0.01em] text-accent">
-          BidEdge
+        <Link href="/" className="font-display text-[19px] font-semibold tracking-[-0.01em] text-ink">
+          Bid<span className="text-accent">Edge</span>
         </Link>
       </div>
 

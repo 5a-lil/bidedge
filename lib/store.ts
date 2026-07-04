@@ -32,7 +32,9 @@ const DEFAULT_PERSISTED: Persisted = {
   guardrails: { monthlyBudget: 600, defaultCeiling: 150, humanConfirm: true },
   limits: { "seiko-6139": 210 },
   followed: [],
-  categories: ["Montres Seiko vintage", "RAM DDR5 / composants", "GPU / cartes graphiques"],
+  // types de produits monitorés sur eBay — montres en exemple (requêtes
+  // propres qui remontent de vrais lots) ; l'utilisateur en ajoute d'autres.
+  categories: ["Montre vintage", "Seiko automatique"],
   onboarded: false,
 };
 

@@ -1,54 +1,59 @@
 @import "tailwindcss";
 
-/* Design system BidEdge — copie exacte du prototype.
-   Une seule couleur d'action (teal), sémantique en texte/teinte uniquement,
-   boutons pill, cartes 16–24px, une seule ombre douce. */
+/* ————————————————————————————————————————————————————————————————
+   DA « Paper & Ink » — claire, éditoriale, calme.
+   Papier chaud + encre profonde + une seule couleur d'action (teal).
+   Displays en serif (Fraunces), UI en Inter, TOUS les chiffres en
+   JetBrains Mono. Cartes 20–24px, ombres très douces, hairlines chaudes.
+   ———————————————————————————————————————————————————————————————— */
 
 @theme {
-  /* encres & surfaces */
-  --color-ink: #0a0b0d;
-  --color-body: #5b616e;
-  --color-muted: #7c828a;
-  --color-hairline: #dee1e6;
-  --color-app: #f7f7f7;
-  --color-control: #eef0f3;
-  --color-control-hover: #e2e6ea;
+  /* encres & surfaces — chaudes */
+  --color-ink: #16150f;
+  --color-body: #55534b;
+  --color-muted: #8b8880;
+  --color-hairline: #e9e6df;
+  --color-app: #faf9f6;
+  --color-control: #f1efe9;
+  --color-control-hover: #e7e4dc;
 
-  /* accent action — avec parcimonie */
+  /* accent action — teal encre, avec parcimonie */
   --color-accent: #147879;
-  --color-accent-press: #0e5a5a;
-  --color-accent-tint: #e8f1f1;
-  --color-accent-disabled: #a9c6c6;
+  --color-accent-press: #0c5b55;
+  --color-accent-tint: #e7f1ef;
+  --color-accent-disabled: #a9c6c2;
 
   /* accent sur fond sombre */
   --color-accent-dark: #3fb6b7;
   --color-accent-dark2: #4ec2c3;
 
   /* sémantique (texte/teinte uniquement, jamais en fond de bouton) */
-  --color-up: #05b169;
-  --color-up-strong: #059460;
-  --color-up-tint: #e6f6ef;
-  --color-down: #cf202f;
-  --color-down-tint: #fdeef0;
-  --color-warn: #b45309;
+  --color-up: #0a9a5c;
+  --color-up-strong: #067a4b;
+  --color-up-tint: #e5f3e9;
+  --color-down: #c92f39;
+  --color-down-tint: #faeceb;
+  --color-warn: #a6621a;
 
-  /* sombre (login / rail onboarding / landing hero) */
-  --color-dark-card: #16181c;
-  --color-dark-border: #23262c;
-  --color-dark-text: #a8acb3;
-  --color-dark-input: #0f1114;
-  --color-dark-input-border: #2a2e35;
+  /* sombre (sections landing / barres admin) — noir chaud */
+  --color-dark-card: #201f19;
+  --color-dark-border: #35332a;
+  --color-dark-text: #aaa79d;
+  --color-dark-input: #191813;
+  --color-dark-input-border: #3a382e;
 
   /* typo */
   --font-sans: var(--font-inter), Inter, -apple-system, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), "Fraunces", Georgia, "Times New Roman", serif;
   --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
 
-  /* ombres */
-  --shadow-soft: 0 4px 16px rgba(10, 11, 13, 0.05);
-  --shadow-card: 0 1px 2px rgba(10, 11, 13, 0.04), 0 4px 16px rgba(10, 11, 13, 0.05);
-  --shadow-pop: 0 1px 2px rgba(10, 11, 13, 0.04), 0 12px 40px rgba(10, 11, 13, 0.08);
-  --shadow-overlay: 0 32px 80px rgba(10, 11, 13, 0.3);
-  --shadow-cta: 0 6px 18px rgba(20, 120, 121, 0.35);
+  /* ombres — encre chaude, très douces */
+  --shadow-soft: 0 4px 16px rgba(22, 21, 15, 0.05);
+  --shadow-card: 0 1px 2px rgba(22, 21, 15, 0.03), 0 8px 24px rgba(22, 21, 15, 0.05);
+  --shadow-pop: 0 1px 2px rgba(22, 21, 15, 0.04), 0 16px 48px rgba(22, 21, 15, 0.09);
+  --shadow-overlay: 0 32px 80px rgba(22, 21, 15, 0.28);
+  --shadow-cta: 0 8px 24px rgba(20, 120, 121, 0.28);
+  --shadow-lift: 0 16px 40px rgba(22, 21, 15, 0.1);
 
   /* animations */
   --animate-pulse-teal: pulseR 2.4s ease infinite;
@@ -62,14 +67,14 @@
 }
 
 @keyframes pulseR {
-  0% { box-shadow: 0 0 0 0 rgba(20, 120, 121, 0.3); }
+  0% { box-shadow: 0 0 0 0 rgba(20, 120, 121, 0.28); }
   70% { box-shadow: 0 0 0 11px rgba(20, 120, 121, 0); }
   100% { box-shadow: 0 0 0 0 rgba(20, 120, 121, 0); }
 }
 @keyframes pulseRed {
-  0% { box-shadow: 0 0 0 0 rgba(207, 32, 47, 0.3); }
-  70% { box-shadow: 0 0 0 9px rgba(207, 32, 47, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(207, 32, 47, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(201, 47, 57, 0.3); }
+  70% { box-shadow: 0 0 0 9px rgba(201, 47, 57, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 47, 57, 0); }
 }
 @keyframes blink {
   0%, 100% { opacity: 1; }
@@ -110,10 +115,11 @@ body {
   color: var(--color-ink);
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01";
 }
 
 ::selection {
-  background: rgba(20, 120, 121, 0.22);
+  background: rgba(20, 120, 121, 0.18);
 }
 
 input {
@@ -121,4 +127,13 @@ input {
 }
 input:focus {
   border-color: var(--color-accent) !important;
+}
+
+/* utilitaires DA */
+.overline {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-muted);
 }

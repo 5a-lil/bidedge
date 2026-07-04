@@ -7,8 +7,8 @@ import { useApp } from "@/lib/store";
 // Organisation — radar partagé, rôles clairs. Chaque enchère reste
 // validée par la personne qui la place (aucun autobid, jamais).
 
-const CARD = "rounded-[18px] bg-white px-5 py-[18px] shadow-card";
-const LABEL = "text-[11px] font-bold uppercase tracking-[.08em] text-muted";
+const CARD = "rounded-3xl border border-hairline bg-white px-6 py-5 shadow-card";
+const LABEL = "overline";
 
 type ApiRole = "owner" | "encherisseur" | "observateur";
 
@@ -34,7 +34,7 @@ const TINT_TEXTS = ["#0e5a5a", "#5b616e", "#a06414", "#6b4fbb", "#059460"];
 const ROLE_BADGE: Record<ApiRole, string> = {
   owner: "bg-accent-tint text-accent-press",
   encherisseur: "bg-control text-ink",
-  observateur: "bg-white text-muted",
+  observateur: "border border-hairline bg-white text-muted",
 };
 
 const ROLE_LABEL: Record<ApiRole, string> = {
@@ -117,12 +117,14 @@ export default function OrganisationPage() {
   return (
     <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-[26px]">
       <div className="flex items-center gap-3">
-        <span className="text-[28px] font-normal tracking-[-0.02em]">Organisation</span>
+        <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
+          Organisation
+        </h1>
         <span className="inline-flex items-center rounded-full bg-ink px-[13px] py-[5px] text-[11.5px] font-semibold text-white">
           Team RAISE · Pro
         </span>
       </div>
-      <div className="mt-[5px] text-[13px] text-body">
+      <div className="mt-1.5 text-[13px] text-body">
         Un radar partagé, des rôles clairs — chaque enchère reste validée par la personne qui la
         place.
       </div>
@@ -148,7 +150,7 @@ export default function OrganisationPage() {
             type="button"
             whileTap={{ scale: 0.96 }}
             onClick={invite}
-            className="inline-flex h-[38px] cursor-pointer items-center rounded-full bg-accent px-[17px] text-[12.5px] font-semibold text-white hover:bg-accent-press"
+            className="inline-flex h-[38px] cursor-pointer items-center rounded-full bg-accent px-[17px] text-[12.5px] font-semibold text-white shadow-cta hover:bg-accent-press"
           >
             Inviter
           </motion.button>
@@ -159,10 +161,10 @@ export default function OrganisationPage() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex items-center gap-3 border-b border-control py-2.5"
+            className="flex items-center gap-3 border-b border-hairline py-2.5 last:border-b-0"
           >
             <span
-              className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full text-[12.5px] font-bold"
+              className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full text-[12.5px] font-semibold"
               style={{ background: TINTS[i % 5], color: TINT_TEXTS[i % 5] }}
             >
               {initialOf(m.name)}
@@ -172,7 +174,7 @@ export default function OrganisationPage() {
               <span className="text-[11.5px] text-muted">{m.email}</span>
             </span>
             <span
-              className={`inline-flex items-center rounded-full px-[13px] py-[5px] text-[11.5px] font-bold ${ROLE_BADGE[m.role]}`}
+              className={`inline-flex items-center rounded-full px-[13px] py-[5px] text-[11.5px] font-semibold ${ROLE_BADGE[m.role]}`}
             >
               {m.roleLabel}
             </span>
@@ -180,7 +182,7 @@ export default function OrganisationPage() {
               type="button"
               aria-label={`Options pour ${m.name}`}
               onClick={() => notify("Bientôt disponible")}
-              className="cursor-pointer font-bold text-[#a8acb3] hover:text-ink"
+              className="cursor-pointer font-semibold text-muted hover:text-ink"
             >
               ···
             </button>
@@ -189,16 +191,16 @@ export default function OrganisationPage() {
         {invitations.map((inv) => (
           <div
             key={inv.id}
-            className="flex items-center gap-3 border-b border-control py-2.5"
+            className="flex items-center gap-3 border-b border-hairline py-2.5 last:border-b-0"
           >
-            <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-control text-[12.5px] font-bold text-muted">
+            <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-control text-[12.5px] font-semibold text-muted">
               {initialOf(inv.email)}
             </span>
             <span className="flex flex-1 flex-col leading-[1.25]">
               <span className="text-[13.5px] font-semibold text-body">{inv.email}</span>
               <span className="text-[11.5px] text-muted">invité · en attente</span>
             </span>
-            <span className="inline-flex items-center rounded-full bg-white px-[13px] py-[5px] text-[11.5px] font-bold text-muted">
+            <span className="inline-flex items-center rounded-full bg-white px-[13px] py-[5px] text-[11.5px] font-semibold text-muted">
               {ROLE_LABEL[inv.role]}
             </span>
           </div>
@@ -215,7 +217,7 @@ export default function OrganisationPage() {
               dépensés sur <span className="font-mono">€2 000</span>
             </span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-control">
+          <div className="h-1.5 overflow-hidden rounded-full bg-control">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "20.5%" }}
@@ -249,24 +251,26 @@ export default function OrganisationPage() {
       {/* activité récente */}
       <div className={`${CARD} mb-2 mt-3.5 flex flex-col gap-0.5`}>
         <span className={`${LABEL} mb-2`}>Activité récente</span>
-        <div className="flex items-center gap-2.5 border-b border-control py-2 text-[13px]">
+        <div className="flex items-center gap-2.5 border-b border-hairline py-2 text-[13px]">
           <span className="h-[7px] w-[7px] flex-none rounded-full bg-accent" />
           <span>
-            <b>Lex</b> a suivi <b>RTX 3090 Ti</b>
+            <span className="font-semibold text-ink">Lex</span> a suivi{" "}
+            <span className="font-semibold text-ink">RTX 3090 Ti</span>
           </span>
           <span className="ml-auto text-[11.5px] text-muted">il y a 2 min</span>
         </div>
-        <div className="flex items-center gap-2.5 border-b border-control py-2 text-[13px]">
+        <div className="flex items-center gap-2.5 border-b border-hairline py-2 text-[13px]">
           <span className="h-[7px] w-[7px] flex-none rounded-full bg-hairline" />
           <span>
-            <b>Sam</b> a relevé sa limite GPU à <span className="font-mono">€600</span>
+            <span className="font-semibold text-ink">Sam</span> a relevé sa limite GPU à{" "}
+            <span className="font-mono">€600</span>
           </span>
           <span className="ml-auto text-[11.5px] text-muted">hier</span>
         </div>
         <div className="flex items-center gap-2.5 py-2 text-[13px]">
           <span className="h-[7px] w-[7px] flex-none rounded-full bg-hairline" />
           <span>
-            <b>Nina</b> a rejoint l&apos;organisation
+            <span className="font-semibold text-ink">Nina</span> a rejoint l&apos;organisation
           </span>
           <span className="ml-auto text-[11.5px] text-muted">lundi</span>
         </div>

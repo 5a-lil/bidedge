@@ -26,10 +26,10 @@ export function AdminLogoutButton() {
   return (
     <motion.button
       type="button"
-      whileTap={{ scale: 0.96 }}
+      whileTap={{ scale: 0.97 }}
       onClick={logout}
       disabled={pending}
-      className="inline-flex h-9 cursor-pointer items-center rounded-full border border-dark-border bg-dark-card px-4 text-[12.5px] font-semibold text-dark-text transition-colors hover:text-white disabled:cursor-default disabled:opacity-60"
+      className="inline-flex h-9 cursor-pointer items-center rounded-full bg-control px-4 text-[12.5px] font-semibold text-ink transition-colors hover:bg-control-hover disabled:cursor-default disabled:opacity-60"
     >
       {pending ? "…" : "Déconnexion"}
     </motion.button>

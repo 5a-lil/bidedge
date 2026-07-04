@@ -9,6 +9,7 @@ export type LotEvent = {
   title: string;
   platform: "ebay" | "catawiki" | "drouot";
   imageUrl?: string;
+  itemWebUrl?: string; // lien vers l'annonce — l'humain enchérit là lui-même
   currentBid: number;
   currency: "EUR";
   bidCount: number;

@@ -17,6 +17,10 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     hydrate();
+    // En mode données réelles (eBay), le radar est alimenté par l'API eBay,
+    // pas par le simulateur scripté — on n'ouvre pas le flux SSE de démo
+    // (sinon ses overlays « surenchéri / enchère terminée » se déclencheraient).
+    if (process.env.NEXT_PUBLIC_DATA_SOURCE === "ebay") return;
     const es = new EventSource("/api/feed");
     const handlers = EVENT_TYPES.map((type) => {
       const handler = (e: MessageEvent) => {

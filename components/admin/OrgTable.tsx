@@ -74,7 +74,7 @@ export function OrgTable() {
     <div className="mt-7">
       {state === "ready" && (
         <div className="mb-3 flex items-center">
-          <span className="text-[11px] font-bold uppercase tracking-[.08em] text-muted">
+          <span className="overline">
             Tenants&nbsp;·&nbsp;<span className="font-mono">{orgs.length}</span>
           </span>
         </div>
@@ -83,19 +83,19 @@ export function OrgTable() {
       {state === "loading" && (
         <div className="flex flex-col gap-3" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-[108px] animate-pulse rounded-[18px] bg-white shadow-card" />
+            <div key={i} className="h-[108px] animate-pulse rounded-3xl bg-control" />
           ))}
         </div>
       )}
 
       {state === "error" && (
-        <div className="rounded-[18px] bg-down-tint px-5 py-4 text-[13px] font-semibold text-down">
+        <div className="rounded-3xl bg-down-tint px-5 py-4 text-[13px] font-semibold text-down">
           {errMsg}
         </div>
       )}
 
       {state === "ready" && orgs.length === 0 && (
-        <div className="rounded-[18px] bg-white px-5 py-10 text-center text-[13px] text-muted shadow-card">
+        <div className="rounded-3xl border border-hairline bg-white px-5 py-10 text-center text-[13px] text-muted shadow-card">
           Aucune organisation pour le moment.
         </div>
       )}

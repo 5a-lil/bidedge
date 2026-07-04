@@ -7,7 +7,7 @@ import { useApp } from "@/lib/store";
 import { Toast } from "@/components/Toast";
 
 // Onboarding 5 étapes — hors du layout (app) : hydrate() au mount, <Toast /> monté ici.
-// Rail sombre à gauche (progression), cartes blanches animées à droite.
+// Rail clair à gauche (progression), cartes blanches animées à droite.
 
 type Cat = { name: string; on: boolean };
 
@@ -191,7 +191,7 @@ export default function OnboardingPage() {
         ? "Recherche live des annonces en cours…"
         : "Calibration de la cote — comparaison des sources…";
 
-  const cardBase = "max-w-full flex flex-col rounded-3xl bg-white shadow-pop";
+  const cardBase = "max-w-full flex flex-col rounded-3xl border border-hairline bg-white shadow-pop";
   const cardBySteps: Record<number, string> = {
     1: `${cardBase} w-[520px] gap-[14px] p-[34px]`,
     2: `${cardBase} w-[560px] gap-4 p-[34px]`,
@@ -202,10 +202,10 @@ export default function OnboardingPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Rail sombre — progression */}
-      <div className="flex w-[300px] flex-none flex-col bg-ink px-[28px] py-8 text-white">
-        <div className="text-lg font-bold tracking-[-0.01em]">
-          Bid<span className="text-accent-dark">Edge</span>
+      {/* Rail clair — progression */}
+      <div className="flex w-[300px] flex-none flex-col border-r border-hairline bg-white px-7 py-8">
+        <div className="font-display text-[20px] font-medium tracking-[-0.01em] text-ink">
+          Bid<span className="text-accent-press">Edge</span>
         </div>
         <div className="mt-[44px] flex flex-col gap-[22px]">
           {RAIL_STEPS.map((st) => {
@@ -214,18 +214,18 @@ export default function OnboardingPage() {
             return (
               <div key={st.n} className="flex items-center gap-[13px]">
                 <span
-                  className={`flex h-7 w-7 flex-none items-center justify-center rounded-full border-[1.5px] text-xs font-bold ${
+                  className={`flex h-7 w-7 flex-none items-center justify-center rounded-full text-xs font-bold ${
                     done
-                      ? "border-accent bg-accent text-white"
+                      ? "border border-accent bg-accent text-white"
                       : cur
-                        ? "border-white bg-white text-ink"
-                        : "border-[#3c4046] bg-transparent text-body"
+                        ? "border-2 border-ink bg-white text-ink"
+                        : "border border-hairline bg-white text-muted"
                   }`}
                 >
                   {done ? "✓" : st.n}
                 </span>
                 <span
-                  className={`text-[13.5px] font-semibold ${done || cur ? "text-white" : "text-body"}`}
+                  className={`text-[13.5px] font-semibold ${done || cur ? "text-ink" : "text-muted"}`}
                 >
                   {st.label}
                 </span>
@@ -234,7 +234,7 @@ export default function OnboardingPage() {
           })}
         </div>
         <div className="flex-1" />
-        <div className="text-xs leading-[1.5] text-body">
+        <div className="text-xs leading-[1.5] text-muted">
           Essai Pro 14 jours, sans carte.
           <br />
           Enchères via les API officielles — jamais de bot.
@@ -254,7 +254,9 @@ export default function OnboardingPage() {
           >
             {step === 1 && (
               <>
-                <div className="text-[26px] font-normal tracking-[-0.02em]">Crée ton compte</div>
+                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                  Crée ton compte
+                </div>
                 <div className="-mt-[6px] text-[13.5px] text-body">
                   Deux minutes, et ton radar commence à chasser.
                 </div>
@@ -291,7 +293,7 @@ export default function OnboardingPage() {
                 />
                 {err && <div className="-mt-1 text-[13px] leading-snug text-down">{err}</div>}
                 <motion.button
-                  whileTap={{ scale: 0.96 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={next}
                   className="mt-1 flex h-12 cursor-pointer items-center justify-center rounded-full bg-accent text-[14.5px] font-semibold text-white transition-colors hover:bg-accent-press"
                 >
@@ -311,7 +313,9 @@ export default function OnboardingPage() {
 
             {step === 2 && (
               <>
-                <div className="text-[26px] font-normal tracking-[-0.02em]">Que chasses-tu ?</div>
+                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                  Que chasses-tu ?
+                </div>
                 <div className="-mt-2 text-[13.5px] text-body">
                   Choisis au moins une catégorie. BidEdge en établira la cote à partir des ventes
                   réelles.
@@ -357,7 +361,7 @@ export default function OnboardingPage() {
                   </button>
                   <span className="flex-1" />
                   <motion.button
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={next}
                     className={`inline-flex h-12 cursor-pointer items-center rounded-full px-6 text-[14.5px] font-semibold text-white transition-colors ${
                       picked.length === 0
@@ -373,7 +377,9 @@ export default function OnboardingPage() {
 
             {step === 3 && (
               <>
-                <div className="text-[26px] font-normal tracking-[-0.02em]">Tes garde-fous</div>
+                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                  Tes garde-fous
+                </div>
                 <div className="mb-3 mt-[2px] text-[13.5px] text-body">
                   Fixés à froid, respectés à chaud. Tu pourras les ajuster dans Réglages.
                 </div>
@@ -426,7 +432,7 @@ export default function OnboardingPage() {
                   </button>
                   <span className="flex-1" />
                   <motion.button
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={next}
                     className="inline-flex h-12 cursor-pointer items-center rounded-full bg-accent px-6 text-[14.5px] font-semibold text-white transition-colors hover:bg-accent-press"
                   >
@@ -438,7 +444,7 @@ export default function OnboardingPage() {
 
             {step === 4 && (
               <>
-                <div className="text-[26px] font-normal tracking-[-0.02em]">
+                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
                   Connecte tes plateformes
                 </div>
                 <div className="mb-3 mt-[2px] text-[13.5px] text-body">
@@ -478,7 +484,7 @@ export default function OnboardingPage() {
                   </button>
                   <span className="flex-1" />
                   <motion.button
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={next}
                     className="inline-flex h-12 cursor-pointer items-center rounded-full bg-accent px-6 text-[14.5px] font-semibold text-white shadow-cta transition-colors hover:bg-accent-press"
                   >
@@ -491,7 +497,7 @@ export default function OnboardingPage() {
             {step === 5 &&
               (scan < 100 ? (
                 <>
-                  <div className="text-[26px] font-normal tracking-[-0.02em]">
+                  <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
                     On établit ta cote…
                   </div>
                   <div className="-mt-2 text-[13.5px] text-body">{scanLabel}</div>
@@ -508,7 +514,7 @@ export default function OnboardingPage() {
                   <div className="mx-auto flex h-14 w-14 animate-card-in items-center justify-center rounded-full bg-accent-tint text-2xl font-bold text-accent-press">
                     ✓
                   </div>
-                  <div className="text-[26px] font-normal tracking-[-0.02em]">
+                  <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
                     Ton radar est prêt.
                   </div>
                   <div className="-mt-2 text-[13.5px] text-body">
@@ -526,7 +532,7 @@ export default function OnboardingPage() {
                     ))}
                   </div>
                   <motion.button
-                    whileTap={{ scale: 0.96 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={finish}
                     disabled={submitting}
                     className="mx-auto mt-2 inline-flex h-[50px] cursor-pointer items-center justify-center rounded-full bg-accent px-7 text-[15px] font-semibold text-white shadow-cta transition-colors hover:bg-accent-press disabled:cursor-not-allowed disabled:bg-accent-disabled"

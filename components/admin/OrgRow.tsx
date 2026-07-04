@@ -22,7 +22,7 @@ type BusyKey = "plan" | "status" | "trial7" | "trial30";
 type PatchBody = { plan?: Plan; status?: SubscriptionStatus; extendTrialDays?: number };
 
 const SELECT_CLASS =
-  "h-9 cursor-pointer appearance-none rounded-full border border-hairline bg-white pl-3.5 pr-9 text-[12.5px] font-semibold text-ink transition-colors hover:bg-control disabled:cursor-default disabled:opacity-55";
+  "h-9 cursor-pointer appearance-none rounded-full border border-hairline bg-white pl-3.5 pr-9 text-[12.5px] font-semibold text-ink outline-none transition-colors hover:bg-control focus:border-accent disabled:cursor-default disabled:opacity-55";
 
 const TRIAL_BTN =
   "inline-flex h-9 min-w-[52px] cursor-pointer items-center justify-center rounded-full bg-control px-3 text-[12.5px] font-semibold text-ink transition-colors hover:bg-control-hover disabled:cursor-default disabled:opacity-55";
@@ -90,21 +90,27 @@ export function OrgRow({
   }
 
   return (
-    <div className="rounded-[18px] bg-white px-5 py-4 shadow-card">
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="rounded-3xl border border-hairline bg-white px-5 py-4 shadow-card transition-shadow hover:shadow-lift"
+    >
       {/* identité + état courant */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex min-w-[160px] flex-1 flex-col leading-[1.3]">
-          <span className="truncate text-[14.5px] font-semibold">{org.name}</span>
+        <div className="flex min-w-40 flex-1 flex-col leading-[1.3]">
+          <span className="truncate font-display text-[17px] font-medium tracking-[-0.01em] text-ink">
+            {org.name}
+          </span>
           <span className="truncate font-mono text-[11.5px] text-muted">{org.slug}</span>
         </div>
 
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-control px-3 py-1 text-[11.5px] font-bold text-ink">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-control px-3 py-1 text-[11.5px] font-semibold text-ink">
           {org.planLabel}
           <span className="font-mono font-semibold text-muted">€{org.priceEUR}</span>
         </span>
 
         <span
-          className={`inline-flex items-center rounded-full px-3 py-1 text-[11.5px] font-bold ${statusBadgeClass(org.status)}`}
+          className={`inline-flex items-center rounded-full px-3 py-1 text-[11.5px] font-semibold ${statusBadgeClass(org.status)}`}
         >
           {org.statusLabel}
         </span>
@@ -136,7 +142,7 @@ export function OrgRow({
       </div>
 
       {/* contrôles opérationnels */}
-      <div className="mt-3.5 flex flex-wrap items-center gap-2.5 border-t border-control pt-3.5">
+      <div className="mt-3.5 flex flex-wrap items-center gap-2.5 border-t border-hairline pt-3.5">
         <div className="relative">
           <select
             value={org.plan}
@@ -175,7 +181,7 @@ export function OrgRow({
           </span>
         </div>
 
-        <span className="mx-0.5 hidden h-5 w-px bg-control sm:block" />
+        <span className="mx-0.5 hidden h-5 w-px bg-hairline sm:block" />
 
         <button
           type="button"
@@ -233,6 +239,6 @@ export function OrgRow({
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

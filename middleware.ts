@@ -21,9 +21,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 
+  // Visiteur anonyme sur la racine → il voit la LANDING (rewrite : l'URL
+  // reste "/"). Connecté, "/" reste le radar.
+  if (!authed && pathname === "/") {
+    return NextResponse.rewrite(new URL("/home", req.url));
+  }
+
   if (!authed && !isPublic(pathname)) {
     const url = new URL("/login", req.url);
-    if (pathname !== "/") url.searchParams.set("next", pathname);
+    url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
 
