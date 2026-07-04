@@ -51,7 +51,7 @@ async function main() {
 
   // — membres (l'owner Manou + l'équipe) —
   const team: { email: string; name: string; role: schema.Role }[] = [
-    { email: ")", name: "Manou", role: "owner" },
+    { email: "manou@bidedge.app", name: "Manou", role: "owner" },
     { email: "lex@bidedge.app", name: "Lex", role: "encherisseur" },
     { email: "sam@bidedge.app", name: "Sam", role: "encherisseur" },
     { email: "nina@bidedge.app", name: "Nina", role: "observateur" },
