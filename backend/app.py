@@ -157,7 +157,7 @@ def estimate():
         }
 
     # Current market: live eBay listings (asking / current-bid prices).
-    listings = search_active_listings(query, limit=20)
+    listings = search_active_listings(query, limit=100)
     asking = None
     if listings:
         prices = sorted(l["askingPrice"] for l in listings)
