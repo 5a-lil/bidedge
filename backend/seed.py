@@ -17,6 +17,11 @@ with _SEED_PATH.open(encoding="utf-8") as f:
     _SEED: list[dict] = json.load(f)
 
 
+def categories() -> list[str]:
+    """Distinct categories present in the seed dataset — the source of truth."""
+    return sorted({e["category"] for e in _SEED})
+
+
 def seed_sales(query: str, category: str | None = None) -> list[dict]:
     """Return seed sales relevant to the query, optionally filtered by category."""
     scored = []

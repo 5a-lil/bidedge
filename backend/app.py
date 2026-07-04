@@ -42,14 +42,8 @@ from flask_cors import CORS
 import db
 from ebay_client import search_active_listings
 from exa_client import search_web_sales
-from market import (
-    VALID_CATEGORIES,
-    dedupe,
-    percentile,
-    summarize,
-    check_material_authenticity,
-)
-from seed import seed_sales
+from market import dedupe, percentile, summarize, check_material_authenticity
+from seed import categories, seed_sales
 
 load_dotenv()
 
@@ -77,7 +71,7 @@ def health():
                 os.environ.get("EBAY_CLIENT_ID") and os.environ.get("EBAY_CLIENT_SECRET")
             ),
             "storedSales": db.count_rows(),
-            "categories": list(VALID_CATEGORIES),
+            "categories": categories(),
         }
     )
 

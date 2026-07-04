@@ -6,8 +6,6 @@ from __future__ import annotations
 import re
 from typing import Iterable
 
-VALID_CATEGORIES = ("watches", "bags", "ram")
-
 def keywords(text: str) -> list[str]:
     return [w for w in re.split(r"\s+", text.lower()) if len(w) > 2]
 
