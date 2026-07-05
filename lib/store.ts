@@ -107,7 +107,7 @@ export type AppState = {
   clearToast: (id: number) => void;
   setLimit: (lotId: string, value: number) => void;
   setGuardrails: (g: Partial<Omit<GuardRails, "humanConfirm">>) => void;
-  setCategories: (c: string[]) => void;
+  setCategories: (c: string[], opts?: { remote?: boolean }) => void;
   addJournalEntry: (e: JournalEntry) => void;
   setOnboarded: (v: boolean) => void;
   ceilingFor: (lotId: string) => number;
@@ -249,9 +249,20 @@ export const useApp = create<AppState>()((set, get) => ({
     set((st) => ({ guardrails: { ...st.guardrails, ...g, humanConfirm: true } }));
     persist();
   },
-  setCategories: (c) => {
+  setCategories: (c, opts) => {
     set({ categories: c });
     persist();
+    // Sync org (Neon) en arrière-plan — fire-and-forget, jamais bloquant.
+    // remote: false quand la liste VIENT du serveur (évite l'écho).
+    if (opts?.remote !== false && typeof window !== "undefined") {
+      fetch("/api/org/categories", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: c }),
+      }).catch(() => {
+        // hors-ligne / rôle observateur (403) — le local reste la référence
+      });
+    }
   },
   addJournalEntry: (e) => {
     set((st) => ({ journal: [e, ...st.journal] }));

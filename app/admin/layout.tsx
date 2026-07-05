@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex min-h-screen flex-col bg-app text-ink">
       <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b border-hairline bg-white px-6">
-        <span className="font-display text-[18px] font-medium tracking-[-0.01em] text-ink">
+        <span className="headline text-[18px] text-ink">
           Bid<span className="text-accent">Edge</span>
         </span>
         <span className="inline-flex items-center rounded-full bg-ink px-3 py-1 text-[11px] font-semibold tracking-[.02em] text-white">

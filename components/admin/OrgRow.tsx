@@ -93,14 +93,12 @@ export function OrgRow({
     <motion.div
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="rounded-3xl border border-hairline bg-white px-5 py-4 shadow-card transition-shadow hover:shadow-lift"
+      className="rounded-card border border-hairline bg-white px-5 py-4 shadow-card transition-shadow hover:shadow-lift"
     >
       {/* identité + état courant */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div className="flex min-w-40 flex-1 flex-col leading-[1.3]">
-          <span className="truncate font-display text-[17px] font-medium tracking-[-0.01em] text-ink">
-            {org.name}
-          </span>
+          <span className="truncate headline text-[17px] text-ink">{org.name}</span>
           <span className="truncate font-mono text-[11.5px] text-muted">{org.slug}</span>
         </div>
 

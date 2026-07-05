@@ -22,11 +22,34 @@ type EbaySummary = {
   seller?: { name?: string | null; feedbackPercentage?: number | null; feedbackScore?: number | null };
 };
 
+/** Résumé du plan Gemini appliqué à une recherche (transparence UI). */
+export type PlanSummary = {
+  source?: string | null;
+  searchQuery?: string | null;
+  productKind?: string | null;
+  excludeKeywords?: string[];
+  includeParts?: boolean;
+  minPrice?: number | null;
+  maxPrice?: number | null;
+  excludedByKeywords?: number;
+  excludedAsParts?: number;
+};
+
+/** Verdict IA d'un lot (analyse du contexte de l'annonce). */
+export type LotVerdict = {
+  etatReel: string | null;
+  redFlags: string[];
+  prixMaxConseille: number | null;
+  confiance: number | null;
+  resume: string | null;
+};
+
 export type MarketEvaluation = {
   status: "ok" | "no_data";
   basis?: "sold_90d" | "active_listings";
   /** catégorie eBay dominante détectée (ex. "Montres classiques") */
   dominantCategory?: string | null;
+  plan?: PlanSummary | null;
   median: number | null;
   low?: number;
   high?: number;
@@ -90,9 +113,31 @@ export class EbayAdapter implements PlatformAdapter {
   id = "ebay" as const;
 
   async searchListings(category: string): Promise<LotEvent[]> {
-    const data = await getJson<{ items: EbaySummary[] }>(`/auctions?q=${encodeURIComponent(category)}&limit=50`);
-    if (!data?.items) return [];
-    return data.items.map((i) => toLotEvent(i, category));
+    return (await this.searchAuctions(category)).items;
+  }
+
+  /** Enchères actives filtrées (plan Gemini + fenêtre de clôture). */
+  async searchAuctions(
+    category: string,
+    maxHours = 24,
+  ): Promise<{ items: LotEvent[]; plan: PlanSummary | null; dominantCategory: string | null }> {
+    const data = await getJson<{ items: EbaySummary[]; plan?: PlanSummary; dominantCategory?: string | null }>(
+      `/auctions?q=${encodeURIComponent(category)}&limit=60&max_hours=${maxHours}`,
+    );
+    if (!data?.items) return { items: [], plan: null, dominantCategory: null };
+    return {
+      items: data.items.map((i) => toLotEvent(i, category)),
+      plan: data.plan ?? null,
+      dominantCategory: data.dominantCategory ?? null,
+    };
+  }
+
+  /** Verdict IA du contexte d'un lot (état réel, red flags, prix max conseillé). */
+  async analyzeLot(itemId: string, median?: number | null): Promise<LotVerdict | null> {
+    const params = new URLSearchParams({ item_id: itemId });
+    if (median != null) params.set("median", String(median));
+    const data = await getJson<{ verdict: LotVerdict }>(`/lot/analyze?${params.toString()}`);
+    return data?.verdict ?? null;
   }
 
   async getPastSales(category: string): Promise<{ title: string; soldPrice: number; date: string }[]> {

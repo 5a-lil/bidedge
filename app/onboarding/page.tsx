@@ -193,7 +193,7 @@ export default function OnboardingPage() {
         ? "Recherche live des annonces en cours…"
         : "Calibration de la cote — comparaison des sources…";
 
-  const cardBase = "max-w-full flex flex-col rounded-3xl border border-hairline bg-white shadow-pop";
+  const cardBase = "max-w-full flex flex-col rounded-card border border-hairline bg-white shadow-pop";
   const cardBySteps: Record<number, string> = {
     1: `${cardBase} w-[520px] gap-[14px] p-[34px]`,
     2: `${cardBase} w-[560px] gap-4 p-[34px]`,
@@ -206,7 +206,7 @@ export default function OnboardingPage() {
     <div className="flex h-screen overflow-hidden">
       {/* Rail clair — progression */}
       <div className="flex w-[300px] flex-none flex-col border-r border-hairline bg-white px-7 py-8">
-        <div className="font-display text-[20px] font-medium tracking-[-0.01em] text-ink">
+        <div className="headline text-[20px] text-ink">
           Bid<span className="text-accent-press">Edge</span>
         </div>
         <div className="mt-[44px] flex flex-col gap-[22px]">
@@ -220,7 +220,7 @@ export default function OnboardingPage() {
                     done
                       ? "border border-accent bg-accent text-white"
                       : cur
-                        ? "border-2 border-ink bg-white text-ink"
+                        ? "border border-accent bg-accent text-white shadow-cta"
                         : "border border-hairline bg-white text-muted"
                   }`}
                 >
@@ -256,7 +256,7 @@ export default function OnboardingPage() {
           >
             {step === 1 && (
               <>
-                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                <div className="headline text-[28px] text-ink">
                   Crée ton compte
                 </div>
                 <div className="-mt-[6px] text-[13.5px] text-body">
@@ -315,7 +315,7 @@ export default function OnboardingPage() {
 
             {step === 2 && (
               <>
-                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                <div className="headline text-[28px] text-ink">
                   Que chasses-tu ?
                 </div>
                 <div className="-mt-2 text-[13.5px] text-body">
@@ -379,7 +379,7 @@ export default function OnboardingPage() {
 
             {step === 3 && (
               <>
-                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                <div className="headline text-[28px] text-ink">
                   Tes garde-fous
                 </div>
                 <div className="mb-3 mt-[2px] text-[13.5px] text-body">
@@ -446,7 +446,7 @@ export default function OnboardingPage() {
 
             {step === 4 && (
               <>
-                <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                <div className="headline text-[28px] text-ink">
                   Connecte tes plateformes
                 </div>
                 <div className="mb-3 mt-[2px] text-[13.5px] text-body">
@@ -499,11 +499,11 @@ export default function OnboardingPage() {
             {step === 5 &&
               (scan < 100 ? (
                 <>
-                  <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                  <div className="headline text-[28px] text-ink">
                     On établit ta cote…
                   </div>
                   <div className="-mt-2 text-[13.5px] text-body">{scanLabel}</div>
-                  <div className="mt-[10px] h-[10px] overflow-hidden rounded-full bg-control">
+                  <div className="mt-[10px] h-[10px] overflow-hidden rounded-full bg-hairline">
                     <div
                       className="h-full rounded-full bg-accent"
                       style={{ width: pct, transition: "width 1s linear" }}
@@ -516,7 +516,7 @@ export default function OnboardingPage() {
                   <div className="mx-auto flex h-14 w-14 animate-card-in items-center justify-center rounded-full bg-accent-tint text-2xl font-bold text-accent-press">
                     ✓
                   </div>
-                  <div className="font-display text-[28px] font-normal tracking-[-0.01em] text-ink">
+                  <div className="headline text-[28px] text-ink">
                     Ton radar est prêt.
                   </div>
                   <div className="-mt-2 text-[13.5px] text-body">

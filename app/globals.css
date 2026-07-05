@@ -8,56 +8,62 @@
    ———————————————————————————————————————————————————————————————— */
 
 @theme {
-  /* encres & surfaces — ivoire de salle des ventes */
-  --color-ink: #191712;
-  --color-body: #56524a;
-  --color-muted: #8c877c;
-  --color-hairline: #e7e2d6;
-  --color-app: #f7f5ef;
-  --color-control: #efebe0;
-  --color-control-hover: #e5e0d2;
+  /* encres & surfaces — blanc net + gris système (langage « app widget ») */
+  --color-ink: #1d1d1e;
+  --color-body: #4b4b4f;
+  --color-muted: #8e8e93;
+  --color-hairline: #e5e5ea;
+  --color-app: #ffffff;
+  --color-panel: #f2f2f7;
+  --color-control: #f2f2f7;
+  --color-control-hover: #e5e5ea;
 
-  /* accent action — VERT MARTEAU (l'univers enchères/bonne affaire) */
-  --color-accent: #1f6b47;
-  --color-accent-press: #14503a;
-  --color-accent-tint: #e4f0e7;
-  --color-accent-disabled: #a3c4b2;
+  /* accent action — VERT ENCHÈRE vif (le « go » de la bonne affaire) */
+  --color-accent: #1da757;
+  --color-accent-press: #157a40;
+  --color-accent-tint: #e8f7ee;
+  --color-accent-disabled: #a5d8ba;
 
   /* accent sur fond sombre */
-  --color-accent-dark: #5bc38e;
-  --color-accent-dark2: #7bd3a6;
+  --color-accent-dark: #34d16c;
+  --color-accent-dark2: #5fdd8c;
 
-  /* laiton — marqueurs de cote, héritage maison de vente */
+  /* laiton — marqueurs de cote */
   --color-brass: #a87b2f;
-  --color-brass-tint: #f4ebd9;
+  --color-brass-tint: #f6efdf;
 
   /* sémantique (texte/teinte uniquement, jamais en fond de bouton) */
-  --color-up: #1f8a4c;
-  --color-up-strong: #17714b;
-  --color-up-tint: #e4f0e7;
-  --color-down: #c13a2e;
-  --color-down-tint: #faeae7;
+  --color-up: #1da757;
+  --color-up-strong: #157a40;
+  --color-up-tint: #e8f7ee;
+  --color-down: #e3453a;
+  --color-down-tint: #fdedeb;
   --color-warn: #a87b2f;
 
-  /* sombre (sidebar, sections landing, CTA) — vert-noir profond */
-  --color-dark-card: #142019;
-  --color-dark-border: #2a3a2f;
-  --color-dark-text: #a9b8ac;
-  --color-dark-input: #0f1813;
-  --color-dark-input-border: #33443a;
+  /* sombre (sections landing, CTA, badges) — encre presque noire */
+  --color-dark-card: #1d1d1e;
+  --color-dark-border: #2f2f30;
+  --color-dark-text: #a8a8ad;
+  --color-dark-input: #161617;
+  --color-dark-input-border: #3a3a3c;
 
   /* typo */
   --font-sans: var(--font-inter), Inter, -apple-system, system-ui, sans-serif;
   --font-display: var(--font-fraunces), "Fraunces", Georgia, "Times New Roman", serif;
   --font-mono: var(--font-jetbrains), "JetBrains Mono", monospace;
 
-  /* ombres — encre chaude, très douces */
-  --shadow-soft: 0 4px 16px rgba(25, 23, 18, 0.05);
-  --shadow-card: 0 1px 2px rgba(25, 23, 18, 0.03), 0 8px 24px rgba(25, 23, 18, 0.05);
-  --shadow-pop: 0 1px 2px rgba(25, 23, 18, 0.04), 0 16px 48px rgba(25, 23, 18, 0.09);
-  --shadow-overlay: 0 32px 80px rgba(25, 23, 18, 0.28);
-  --shadow-cta: 0 8px 24px rgba(31, 107, 71, 0.28);
-  --shadow-lift: 0 16px 40px rgba(25, 23, 18, 0.1);
+  /* ombres — discrètes, le relief vient des panneaux gris */
+  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 1px 2px rgba(29, 29, 30, 0.04), 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --shadow-pop: 0 2px 4px rgba(29, 29, 30, 0.05), 0 16px 40px rgba(29, 29, 30, 0.1);
+  --shadow-overlay: 0 32px 80px rgba(29, 29, 30, 0.28);
+  --shadow-cta: 0 8px 24px rgba(29, 167, 87, 0.3);
+  --shadow-lift: 0 12px 32px rgba(29, 29, 30, 0.12);
+
+  /* rayons — langage widget très arrondi */
+  --radius-widget: 14px;
+  --radius-card: 21px;
+  --radius-panel: 30px;
 
   /* animations */
   --animate-pulse-teal: pulseR 2.4s ease infinite;
@@ -68,6 +74,10 @@
   --animate-floaty: floaty 8s ease-in-out infinite alternate;
   --animate-floaty2: floaty2 9.5s ease-in-out infinite alternate;
   --animate-slide-bar: slideBar 1.4s linear infinite;
+  --animate-rise: riseIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  --animate-tilt: tiltSway 2s ease-in-out infinite;
+  --animate-widget-in: widgetIn 0.5s ease-out backwards;
+  --animate-shimmer: shimmerX 3s ease-in-out infinite;
 }
 
 @keyframes pulseR {
@@ -108,6 +118,26 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(260%); }
 }
+/* reveals « widget » : montée franche, ease-out long */
+@keyframes riseIn {
+  0% { opacity: 0; transform: translateY(46px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes tiltSway {
+  0% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+  100% { transform: rotate(-3deg); }
+}
+@keyframes widgetIn {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shimmerX {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translateX(100%); opacity: 0.5; }
+  100% { transform: translateX(200%); opacity: 0; }
+}
 
 html,
 body {
@@ -140,4 +170,12 @@ input:focus {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-muted);
+}
+
+/* titres « widget-app » : sans-serif dense et grasse, tracking serré */
+.headline {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
 }

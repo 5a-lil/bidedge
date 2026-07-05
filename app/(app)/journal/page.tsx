@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import type { JournalEntry } from "@/lib/contracts";
 import { euro } from "@/lib/format";
 import { useApp } from "@/lib/store";
+import { Reveal } from "@/components/ui/taap";
 
 // Journal — la mémoire des décisions. Chaque motif appris est réinjecté
 // dans les advisories suivantes : le copilote s'adapte, l'humain décide.
@@ -33,17 +34,15 @@ export default function JournalPage() {
       {/* header */}
       <div className="overline">Tes décisions nourrissent chaque advisory</div>
       <div className="mt-2 flex items-baseline gap-3">
-        <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
-          Journal
-        </h1>
+        <h1 className="headline text-[34px] text-ink">Journal</h1>
         <span className="text-[13px] text-body">
           <span className="font-mono">{journal.length}</span> décisions ·{" "}
           <span className="font-mono">{wonCount}</span> {wonCount > 1 ? "gagnées" : "gagnée"}
         </span>
       </div>
 
-      {/* décisions */}
-      <div className="mt-5 rounded-3xl border border-hairline bg-white px-6 py-2 shadow-card">
+      {/* décisions — mini-cartes « widget » */}
+      <Reveal className="mt-5 flex flex-col gap-2">
         {journal.map((e) => {
           const badge = badgeOf(e);
           return (
@@ -52,7 +51,7 @@ export default function JournalPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="flex items-center gap-3.5 border-b border-hairline py-[13px] last:border-b-0"
+              className="flex items-center gap-3.5 rounded-widget bg-panel px-3 py-2.5"
             >
               <div className="h-11 w-11 flex-none rounded-xl" style={{ background: e.gradient }} />
               <div className="w-[215px] flex-none">
@@ -71,11 +70,13 @@ export default function JournalPage() {
             </motion.div>
           );
         })}
-      </div>
+      </Reveal>
 
-      <div className="mt-4 rounded-2xl bg-accent-tint px-5 py-3.5 text-[12.5px] text-accent-press">
-        {"Ces motifs sont réinjectés dans chaque advisory — « tu as tenu sous €240 la dernière fois, je suggère €220 ici »."}
-      </div>
+      <Reveal delay={0.1}>
+        <div className="mt-4 rounded-widget bg-accent-tint px-5 py-3.5 text-[12.5px] text-accent-press">
+          {"Ces motifs sont réinjectés dans chaque advisory — « tu as tenu sous €240 la dernière fois, je suggère €220 ici »."}
+        </div>
+      </Reveal>
     </div>
   );
 }

@@ -6,12 +6,13 @@ import { motion } from "motion/react";
 import { Toggle } from "@/components/settings/Toggle";
 import { useApp } from "@/lib/store";
 import { PLANS } from "@/lib/billing/plans";
+import { Reveal } from "@/components/ui/taap";
 
 // Réglages — compte, garde-fous, notifications, plateformes.
 // Le garde-fou "confirmation humaine" est permanent : le toggle est
 // verrouillé ON et ne peut JAMAIS se désactiver.
 
-const CARD = "rounded-3xl border border-hairline bg-white px-6 py-5 shadow-card";
+const CARD = "rounded-card border border-hairline bg-white px-6 py-5 shadow-card";
 const LABEL = "overline";
 
 type Plan = "chasseur" | "pro" | "equipe";
@@ -125,16 +126,15 @@ export default function ReglagesPage() {
 
   return (
     <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-[26px]">
-      <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
-        Réglages
-      </h1>
+      <h1 className="headline text-[34px] text-ink">Réglages</h1>
       <div className="mt-1.5 text-[13px] text-body">Ton compte et tes garde-fous.</div>
 
       {/* abonnement */}
-      <div className={`${CARD} mt-[18px] flex items-center gap-3.5`}>
+      <Reveal className="mt-[18px]">
+      <div className={`${CARD} flex items-center gap-3.5`}>
         <div className="flex flex-1 flex-col gap-1">
           <div className="flex items-center gap-[9px]">
-            <span className="font-display text-[19px] font-medium tracking-[-0.01em] text-ink">
+            <span className="headline text-[19px] text-ink">
               {org ? `Plan ${org.planLabel}${trialing ? " — essai" : ""}` : "Plan"}
             </span>
             {org && (
@@ -166,9 +166,11 @@ export default function ReglagesPage() {
           Gérer la facturation
         </motion.button>
       </div>
+      </Reveal>
 
       {/* profil */}
-      <div className={`${CARD} mt-3.5 flex flex-col gap-3.5`}>
+      <Reveal delay={0.06} className="mt-3.5">
+      <div className={`${CARD} flex flex-col gap-3.5`}>
         <span className={LABEL}>Profil</span>
         <div className="flex items-center gap-3.5">
           <span className="flex h-[46px] w-[46px] flex-none items-center justify-center rounded-full bg-accent-tint text-[17px] font-semibold text-accent-press">
@@ -196,9 +198,11 @@ export default function ReglagesPage() {
           </div>
         </div>
       </div>
+      </Reveal>
 
       {/* enchères & garde-fous */}
-      <div className={`${CARD} mt-3.5 flex flex-col gap-1`}>
+      <Reveal delay={0.12} className="mt-3.5">
+      <div className={`${CARD} flex flex-col gap-1`}>
         <span className={`${LABEL} mb-2`}>Enchères &amp; garde-fous</span>
         <div className="flex items-center justify-between py-2.5 text-[13.5px]">
           <span>Budget mensuel</span>
@@ -248,9 +252,11 @@ export default function ReglagesPage() {
           </span>
         </div>
       </div>
+      </Reveal>
 
       {/* notifications */}
-      <div className={`${CARD} mt-3.5 flex flex-col gap-1`}>
+      <Reveal delay={0.18} className="mt-3.5">
+      <div className={`${CARD} flex flex-col gap-1`}>
         <span className={`${LABEL} mb-2`}>Notifications</span>
         <div className="flex items-center justify-between py-[9px] text-[13.5px]">
           <span>Lot repéré sous −30% de la cote</span>
@@ -267,9 +273,11 @@ export default function ReglagesPage() {
           <Toggle on={n3} onToggle={() => setN3((v) => !v)} label="Fin d'une enchère trackée" />
         </div>
       </div>
+      </Reveal>
 
       {/* plateformes connectées */}
-      <div className={`${CARD} mt-3.5 flex flex-col gap-1`}>
+      <Reveal delay={0.24} className="mt-3.5">
+      <div className={`${CARD} flex flex-col gap-1`}>
         <span className={`${LABEL} mb-2`}>Plateformes connectées</span>
         <div className="flex items-center gap-3 py-[9px] text-[13.5px]">
           <span className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-control text-[11px] font-semibold text-body">
@@ -316,6 +324,7 @@ export default function ReglagesPage() {
           Les enchères passent par les API officielles des plateformes, jamais par scraping.
         </div>
       </div>
+      </Reveal>
 
       {/* pied */}
       <div className="mb-2 mt-4 flex items-center">

@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useApp } from "@/lib/store";
+import { Reveal } from "@/components/ui/taap";
 
 // Organisation — radar partagé, rôles clairs. Chaque enchère reste
 // validée par la personne qui la place (aucun autobid, jamais).
 
-const CARD = "rounded-3xl border border-hairline bg-white px-6 py-5 shadow-card";
+const CARD = "rounded-card border border-hairline bg-white px-6 py-5 shadow-card";
 const LABEL = "overline";
 
 type ApiRole = "owner" | "encherisseur" | "observateur";
@@ -117,9 +118,7 @@ export default function OrganisationPage() {
   return (
     <div className="flex-1 animate-fade-up overflow-y-auto px-8 py-[26px]">
       <div className="flex items-center gap-3">
-        <h1 className="font-display text-[32px] font-normal tracking-[-0.01em] text-ink">
-          Organisation
-        </h1>
+        <h1 className="headline text-[34px] text-ink">Organisation</h1>
         <span className="inline-flex items-center rounded-full bg-ink px-[13px] py-[5px] text-[11.5px] font-semibold text-white">
           Team RAISE · Pro
         </span>
@@ -130,7 +129,8 @@ export default function OrganisationPage() {
       </div>
 
       {/* membres */}
-      <div className={`${CARD} mt-[18px] flex flex-col gap-0.5`}>
+      <Reveal className="mt-[18px]">
+      <div className={`${CARD} flex flex-col gap-0.5`}>
         <div className="mb-2.5 flex items-center gap-2.5">
           <span className={LABEL}>
             Membres ·&nbsp;<span className="font-mono">{members.length}</span>
@@ -206,9 +206,10 @@ export default function OrganisationPage() {
           </div>
         ))}
       </div>
+      </Reveal>
 
       {/* budget partagé + catégories partagées */}
-      <div className="mt-3.5 grid grid-cols-2 gap-3.5">
+      <Reveal delay={0.08} className="mt-3.5 grid grid-cols-2 gap-3.5">
         <div className={`${CARD} flex flex-col gap-[11px]`}>
           <span className={LABEL}>Budget partagé — juillet</span>
           <div className="flex items-baseline gap-2">
@@ -217,7 +218,7 @@ export default function OrganisationPage() {
               dépensés sur <span className="font-mono">€2 000</span>
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-control">
+          <div className="h-1.5 overflow-hidden rounded-full bg-hairline">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "20.5%" }}
@@ -246,10 +247,11 @@ export default function OrganisationPage() {
             Visibles par toute l&apos;équipe — les alertes vont à ceux qui les ont activées.
           </span>
         </div>
-      </div>
+      </Reveal>
 
       {/* activité récente */}
-      <div className={`${CARD} mb-2 mt-3.5 flex flex-col gap-0.5`}>
+      <Reveal delay={0.16} className="mb-2 mt-3.5">
+      <div className={`${CARD} flex flex-col gap-0.5`}>
         <span className={`${LABEL} mb-2`}>Activité récente</span>
         <div className="flex items-center gap-2.5 border-b border-hairline py-2 text-[13px]">
           <span className="h-[7px] w-[7px] flex-none rounded-full bg-accent" />
@@ -275,6 +277,7 @@ export default function OrganisationPage() {
           <span className="ml-auto text-[11.5px] text-muted">lundi</span>
         </div>
       </div>
+      </Reveal>
     </div>
   );
 }

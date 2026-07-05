@@ -17,6 +17,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from ebay_collector import EbayAuthError, EbayCollector
+from gemini_filter import analyze_lot, apply_plan, plan_search, plan_summary
 from market import evaluate as evaluate_deal
 from market import summarize_prices
 
@@ -102,17 +103,35 @@ def auctions():
     min_price = _to_float(request.args.get("min_price"))
     max_price = _to_float(request.args.get("max_price"))
     limit = int(request.args.get("limit", 50))
-    items = collector.get_auctions(q, min_price=min_price, max_price=max_price, limit=limit)
+    # fenêtre de clôture : par défaut, seules les enchères qui ferment sous 24 h
+    max_hours = _to_float(request.args.get("max_hours"))
+    if max_hours is None:
+        max_hours = 24.0
+
+    # plan Gemini : requête nettoyée, accessoires exclus, états filtrés,
+    # bornes de prix exprimées en langage naturel
+    plan = plan_search(q)
+    effective_q = plan.get("search_query") or q
+    if min_price is None:
+        min_price = plan.get("min_price")
+    if max_price is None:
+        max_price = plan.get("max_price")
+
+    items = collector.get_auctions(effective_q, min_price=min_price, max_price=max_price, limit=limit)
     # pertinence ANCRÉE sur le marché global : parmi les enchères seules, la
     # camelote (pièces, stickers, pubs) peut être majoritaire — l'ancre vient
     # de la catégorie dominante des annonces tous formats (« rolex » → Montres)
-    anchor = collector.market_anchor(q)
-    items, dominant = collector.filter_relevant(items, q, anchor_leaf=anchor)
+    anchor = collector.market_anchor(effective_q)
+    items, dominant = collector.filter_relevant(items, effective_q, anchor_leaf=anchor)
+    items, out_kw, out_parts = apply_plan(items, plan)
+    items = collector.filter_closing_within(items, max_hours)
     return jsonify(
         {
             "query": q,
             "count": len(items),
             "dominantCategory": dominant,
+            "maxHours": max_hours,
+            "plan": plan_summary(plan, out_kw, out_parts),
             "items": [_map_summary(i) for i in items],
         }
     )
@@ -122,6 +141,25 @@ def auctions():
 def item(item_id):
     data = collector.get_item(item_id)
     return jsonify(data)
+
+
+@app.get("/lot/analyze")
+def lot_analyze():
+    """Verdict IA pour UN lot déjà jugé rentable (pré-filtre respecté :
+    l'appelant ne demande l'analyse que si worth_bidding est vrai).
+
+    Params : item_id (requis), median (optionnel — évite de recalculer la cote).
+    """
+    item_id = (request.args.get("item_id") or "").strip()
+    if not item_id:
+        return _err("Paramètre 'item_id' requis", 422)
+    median = _to_float(request.args.get("median"))
+
+    data = collector.get_item(item_id)
+    verdict = analyze_lot(data, median, currency=collector.currency)
+    if verdict is None:
+        return _err("Analyse indisponible (clé Gemini manquante ou service saturé)", 503)
+    return jsonify({"itemId": item_id, "median": median, "verdict": verdict})
 
 
 @app.get("/market/median")
@@ -135,7 +173,8 @@ def market_median():
     cond = request.args.get("condition_ids")
     condition_ids = [c for c in cond.split(",") if c] if cond else None
 
-    est = collector.market_estimate(q, condition_ids=condition_ids, days=days, limit=limit)
+    plan = plan_search(q)
+    est = collector.market_estimate(plan.get("search_query") or q, condition_ids=condition_ids, days=days, limit=limit, plan=plan)
     stats = summarize_prices(est["prices"])
     return jsonify(
         {
@@ -144,6 +183,7 @@ def market_median():
             "sources": ["eBay"],
             "basis": est["basis"],  # "sold_90d" | "active_listings"
             "dominantCategory": est.get("dominant_category"),
+            "plan": plan_summary(plan),
             "stats": stats,
             "sample_size": len(est["prices"]),
             "comparables": est["samples"],
@@ -170,7 +210,8 @@ def market_evaluate():
     cond = request.args.get("condition_ids")
     condition_ids = [c for c in cond.split(",") if c] if cond else None
 
-    est = collector.market_estimate(q, condition_ids=condition_ids, days=days, limit=limit)
+    plan = plan_search(q)
+    est = collector.market_estimate(plan.get("search_query") or q, condition_ids=condition_ids, days=days, limit=limit, plan=plan)
     result = evaluate_deal(
         est["prices"],
         current_price=current_price,
@@ -182,6 +223,7 @@ def market_evaluate():
     result["sources"] = ["eBay"]
     result["basis"] = est["basis"]  # "sold_90d" | "active_listings"
     result["dominantCategory"] = est.get("dominant_category")
+    result["plan"] = plan_summary(plan)
     result["comparables"] = est["samples"]
     return jsonify(result)
 

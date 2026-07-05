@@ -12,6 +12,7 @@ import re
 import time
 import unicodedata
 from collections import Counter
+from datetime import datetime, timezone
 
 import requests
 
@@ -162,16 +163,22 @@ class EbayCollector:
             )
         return out
 
-    def market_estimate(self, query, condition_ids=None, days=90, limit=100):
+    def market_estimate(self, query, condition_ids=None, days=90, limit=100, plan=None):
         """Cote du marché : essaie les VENTES CONCLUES (Insights) ; si l'accès
         n'est pas activé, retombe sur la médiane des ANNONCES ACTIVES — dans
-        les deux cas, filtrées par pertinence (catégorie dominante + titre).
+        les deux cas, filtrées par pertinence (catégorie dominante + titre) et,
+        si un plan Gemini est fourni, nettoyées des accessoires / « pour pièces »
+        pour que la cote reflète le produit lui-même.
 
         Renvoie {basis, prices, samples, dominant_category}.
         """
+        from gemini_filter import apply_plan  # import local (pas de cycle)
+
         try:
             sold = self.get_sold_items(query, condition_ids=condition_ids, days=days, limit=limit)
             sold, dominant = self.filter_relevant(sold, query)
+            if plan:
+                sold, _, _ = apply_plan(sold, plan)
             prices = self.sold_prices(sold)
             if prices:
                 return {
@@ -185,6 +192,8 @@ class EbayCollector:
             pass
         listings = self.get_active_listings(query, limit=limit)
         listings, dominant = self.filter_relevant(listings, query)
+        if plan:
+            listings, _, _ = apply_plan(listings, plan)
         return {
             "basis": "active_listings",
             "prices": self.listing_prices(listings),
@@ -284,6 +293,29 @@ class EbayCollector:
         if not kept and not anchored:
             kept = items
         return kept, dominant
+
+    @staticmethod
+    def filter_closing_within(items, max_hours):
+        """Ne garde que les enchères qui clôturent dans les `max_hours` heures.
+
+        max_hours <= 0 → pas de filtre. Les annonces sans date de fin sont
+        écartées (une enchère en a toujours une)."""
+        if not max_hours or max_hours <= 0:
+            return items
+        now = datetime.now(timezone.utc)
+        kept = []
+        for it in items:
+            end_raw = it.get("itemEndDate")
+            if not end_raw:
+                continue
+            try:
+                end = datetime.fromisoformat(str(end_raw).replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            left = (end - now).total_seconds()
+            if 0 < left <= max_hours * 3600:
+                kept.append(it)
+        return kept
 
     def market_anchor(self, query, limit=60):
         """Catégorie feuille dominante du MARCHÉ (annonces tous formats) pour

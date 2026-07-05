@@ -10,6 +10,31 @@ import { useApp } from "@/lib/store";
 
 const EVENT_TYPES: FeedEvent["type"][] = ["snapshot", "lot", "meta", "outbid", "closed", "scan", "ping"];
 
+// Sync one-shot des catégories avec l'org (Neon) — flag module pour ne pas
+// re-synchroniser à chaque remontage (StrictMode inclus).
+let orgCategoriesSynced = false;
+
+function syncOrgCategories(): void {
+  if (orgCategoriesSynced || typeof window === "undefined") return;
+  orgCategoriesSynced = true;
+  fetch("/api/org/categories")
+    .then((res) => (res.ok ? (res.json() as Promise<{ categories?: string[] }>) : null))
+    .then((data) => {
+      if (!data || !Array.isArray(data.categories)) return;
+      const { setCategories, categories: local } = useApp.getState();
+      if (data.categories.length > 0) {
+        // le serveur fait foi — pas de ré-écho vers l'API
+        setCategories(data.categories, { remote: false });
+      } else if (local.length > 0) {
+        // org vierge : on la seed avec la liste locale
+        setCategories(local);
+      }
+    })
+    .catch(() => {
+      // API indisponible — le localStorage reste la référence
+    });
+}
+
 export function FeedProvider({ children }: { children: React.ReactNode }) {
   const hydrate = useApp((s) => s.hydrate);
   const applyFeedEvent = useApp((s) => s.applyFeedEvent);
@@ -17,6 +42,7 @@ export function FeedProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     hydrate();
+    syncOrgCategories();
     // En mode données réelles (eBay), le radar est alimenté par l'API eBay,
     // pas par le simulateur scripté — on n'ouvre pas le flux SSE de démo
     // (sinon ses overlays « surenchéri / enchère terminée » se déclencheraient).

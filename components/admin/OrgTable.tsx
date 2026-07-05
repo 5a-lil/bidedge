@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Plan, SubscriptionStatus } from "@/lib/db/schema";
+import { Reveal } from "@/components/ui/taap";
 import { OrgRow } from "./OrgRow";
 
 // Table opérationnelle des tenants. Charge GET /api/admin/orgs au montage puis
@@ -83,27 +84,29 @@ export function OrgTable() {
       {state === "loading" && (
         <div className="flex flex-col gap-3" aria-busy="true">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-[108px] animate-pulse rounded-3xl bg-control" />
+            <div key={i} className="h-[108px] animate-pulse rounded-card bg-panel" />
           ))}
         </div>
       )}
 
       {state === "error" && (
-        <div className="rounded-3xl bg-down-tint px-5 py-4 text-[13px] font-semibold text-down">
+        <div className="rounded-card bg-down-tint px-5 py-4 text-[13px] font-semibold text-down">
           {errMsg}
         </div>
       )}
 
       {state === "ready" && orgs.length === 0 && (
-        <div className="rounded-3xl border border-hairline bg-white px-5 py-10 text-center text-[13px] text-muted shadow-card">
+        <div className="rounded-card border border-hairline bg-white px-5 py-10 text-center text-[13px] text-muted shadow-card">
           Aucune organisation pour le moment.
         </div>
       )}
 
       {state === "ready" && orgs.length > 0 && (
         <div className="flex flex-col gap-3">
-          {orgs.map((o) => (
-            <OrgRow key={o.id} org={o} onUpdated={handleUpdated} />
+          {orgs.map((o, i) => (
+            <Reveal key={o.id} delay={Math.min(i * 0.06, 0.3)}>
+              <OrgRow org={o} onUpdated={handleUpdated} />
+            </Reveal>
           ))}
         </div>
       )}

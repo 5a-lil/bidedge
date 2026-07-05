@@ -44,7 +44,7 @@ const ROLE_LABEL: Record<OrgRole, string> = {
 };
 
 function iconColor(active: boolean): string {
-  return active ? "#5bc38e" : "#7f9186";
+  return active ? "#1da757" : "#a3a3a8";
 }
 
 const NAV_MAIN: NavItem[] = [
@@ -102,8 +102,8 @@ const NAV_SECONDARY: NavItem[] = [
     icon: (a) => (
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={iconColor(a)} strokeWidth="1.6" strokeLinecap="round">
         <path d="M2.5 5h11M2.5 11h11" />
-        <circle cx="6.2" cy="5" r="1.8" fill="#142019" />
-        <circle cx="10" cy="11" r="1.8" fill="#142019" />
+        <circle cx="6.2" cy="5" r="1.8" fill="#fff" />
+        <circle cx="10" cy="11" r="1.8" fill="#fff" />
       </svg>
     ),
   },
@@ -126,13 +126,13 @@ function NavLink({ item, active, live }: { item: NavItem; active: boolean; live:
     <Link
       href={item.href}
       className={`flex items-center gap-[11px] rounded-full px-3 py-[9px] transition-colors ${
-        active ? "bg-white/10 text-white" : "text-dark-text hover:bg-white/5 hover:text-white"
+        active ? "bg-panel text-ink" : "text-body hover:bg-panel"
       }`}
     >
       <span className="flex">{item.icon(active)}</span>
       <span className="text-[13.5px] font-semibold">{item.label}</span>
       {item.liveDot && live && (
-        <span className="ml-auto h-[7px] w-[7px] animate-blink rounded-full bg-accent-dark" />
+        <span className="ml-auto h-[7px] w-[7px] animate-blink rounded-full bg-accent" />
       )}
     </Link>
   );
@@ -182,17 +182,17 @@ export function Sidebar() {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <div className="flex w-56 flex-none flex-col border-r border-dark-border bg-dark-card px-3 pb-3.5 pt-[18px]">
+    <div className="flex w-56 flex-none flex-col border-r border-hairline bg-white px-3 pb-3.5 pt-[18px]">
       <div className="flex items-center gap-2 px-2.5 pb-5 pt-0.5">
-        <Link href="/" className="font-display text-[19px] font-semibold tracking-[-0.01em] text-white">
-          Bid<span className="text-accent-dark">Edge</span>
+        <Link href="/" className="headline text-[19px] text-ink">
+          Bid<span className="text-accent">Edge</span>
         </Link>
       </div>
 
       {NAV_MAIN.map((item) => (
         <NavLink key={item.href} item={item} active={isActive(item.href)} live={live} />
       ))}
-      <div className="mx-2 my-3 h-px bg-dark-border" />
+      <div className="mx-2 my-3 h-px bg-hairline" />
       {NAV_SECONDARY.map((item) => (
         <NavLink key={item.href} item={item} active={isActive(item.href)} live={live} />
       ))}
@@ -204,10 +204,10 @@ export function Sidebar() {
 
       <Link
         href="/reglages"
-        className="mb-2.5 flex flex-col gap-[7px] rounded-[14px] bg-white/5 p-3 transition-colors hover:bg-white/10"
+        className="mb-2.5 flex flex-col gap-[7px] rounded-[14px] bg-panel p-3 transition-colors hover:bg-control-hover"
       >
         <div className="flex items-center gap-2">
-          <span className="text-[12.5px] font-bold text-white">
+          <span className="text-[12.5px] font-bold text-ink">
             {trialing
               ? `Essai ${org?.planLabel}`
               : org
@@ -215,34 +215,34 @@ export function Sidebar() {
                 : "Abonnement"}
           </span>
           {trialing && (
-            <span className="ml-auto font-mono text-[11px] text-dark-text">{org?.trialDaysLeft} j restants</span>
+            <span className="ml-auto font-mono text-[11px] text-muted">{org?.trialDaysLeft} j restants</span>
           )}
         </div>
         {trialing && (
-          <div className="h-[5px] overflow-hidden rounded-full bg-white/10">
-            <div className="h-full bg-accent-dark" style={{ width: `${trialPct}%` }} />
+          <div className="h-[5px] overflow-hidden rounded-full bg-hairline">
+            <div className="h-full bg-accent" style={{ width: `${trialPct}%` }} />
           </div>
         )}
-        <span className="text-[11.5px] font-semibold text-accent-dark">Gérer l&apos;abonnement →</span>
+        <span className="text-[11.5px] font-semibold text-accent">Gérer l&apos;abonnement →</span>
       </Link>
 
       <Link
         href="/reglages"
-        className="flex items-center gap-2.5 rounded-[14px] px-2.5 py-2 transition-colors hover:bg-white/5"
+        className="flex items-center gap-2.5 rounded-[14px] px-2.5 py-2 transition-colors hover:bg-panel"
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(91,195,142,.16)] text-[12.5px] font-bold text-accent-dark">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-tint text-[12.5px] font-bold text-accent-press">
           {initial}
         </span>
         <span className="flex flex-col leading-[1.2]">
-          <span className="text-[13px] font-semibold text-white">{name || "…"}</span>
-          <span className="text-[11px] text-dark-text">{org ? `${roleLabel} · ${org.name}` : ""}</span>
+          <span className="text-[13px] font-semibold text-ink">{name || "…"}</span>
+          <span className="text-[11px] text-muted">{org ? `${roleLabel} · ${org.name}` : ""}</span>
         </span>
       </Link>
 
       <button
         type="button"
         onClick={logout}
-        className="mt-1 flex cursor-pointer items-center gap-2 rounded-full px-3 py-[7px] text-[11.5px] font-semibold text-dark-text transition-colors hover:bg-white/5 hover:text-white"
+        className="mt-1 flex cursor-pointer items-center gap-2 rounded-full px-3 py-[7px] text-[11.5px] font-semibold text-muted transition-colors hover:bg-panel hover:text-ink"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M6 2.5H3.4A1.4 1.4 0 002 3.9v8.2a1.4 1.4 0 001.4 1.4H6" />

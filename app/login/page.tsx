@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { useApp } from "@/lib/store";
 import { Toast } from "@/components/Toast";
+import { WidgetChip } from "@/components/ui/taap";
 
 // Connexion — écran clair plein écran, hors du layout (app) :
 // on hydrate le store et on monte le Toast nous-mêmes.
@@ -20,10 +21,10 @@ export default function LoginPage() {
     <div className="relative flex h-screen overflow-hidden bg-app">
       {/* Colonne gauche — promesse + cartes produit flottantes */}
       <div className="relative flex flex-[1.2] flex-col justify-center px-[84px]">
-        <div className="mb-10 font-display text-[22px] font-medium tracking-[-0.01em] text-ink">
+        <div className="mb-10 headline text-[22px] text-ink">
           Bid<span className="text-accent-press">Edge</span>
         </div>
-        <h1 className="font-display text-[52px] font-normal leading-[1.08] tracking-[-0.01em] text-ink">
+        <h1 className="headline text-[56px] text-ink">
           L&apos;avantage,
           <br />
           à chaque enchère.
@@ -33,24 +34,36 @@ export default function LoginPage() {
           qui enchéris.
         </p>
 
-        {/* Carte "Enchère suggérée" */}
-        <div className="absolute bottom-[110px] left-[84px] w-[238px] animate-floaty rounded-[20px] border border-hairline bg-white p-4 shadow-pop">
-          <div className="overline">Enchère suggérée</div>
-          <div className="mb-[10px] mt-1 font-mono text-[26px] font-semibold text-ink">€100</div>
-          <div className="inline-flex h-[34px] items-center justify-center rounded-full bg-accent px-4 text-xs font-semibold text-white">
-            Enchérir maintenant
-          </div>
+        {/* Carte "Enchère suggérée" — widget flottant */}
+        <div className="absolute bottom-[110px] left-[84px] w-[238px] -rotate-2">
+          <WidgetChip
+            sway
+            appearDelay={0.25}
+            className="rounded-card border border-hairline bg-white p-4 shadow-pop"
+          >
+            <div className="overline">Enchère suggérée</div>
+            <div className="mb-[10px] mt-1 font-mono text-[26px] font-semibold text-ink">€100</div>
+            <div className="inline-flex h-[34px] items-center justify-center rounded-full bg-accent px-4 text-xs font-semibold text-white">
+              Enchérir maintenant
+            </div>
+          </WidgetChip>
         </div>
 
-        {/* Carte "Ton edge" */}
-        <div className="absolute bottom-[210px] left-[300px] w-[212px] animate-floaty2 rounded-[20px] border border-hairline bg-white p-4 shadow-pop">
-          <div className="overline">Ton edge</div>
-          <div className="relative mt-3 h-3">
-            <div className="absolute inset-x-0 top-[2px] h-2 rounded-full bg-control" />
-            <div className="absolute left-[38%] top-[2px] h-2 w-[52%] rounded-full bg-accent/25" />
-            <div className="absolute left-[12%] top-[-2px] h-3 w-3 rounded-full border-[2.5px] border-white bg-accent shadow-soft" />
-          </div>
-          <div className="mt-[10px] font-mono text-xs text-accent-press">−62% vs cote</div>
+        {/* Carte "Ton edge" — widget flottant */}
+        <div className="absolute bottom-[210px] left-[300px] w-[212px] rotate-2">
+          <WidgetChip
+            sway
+            appearDelay={0.45}
+            className="rounded-card border border-hairline bg-white p-4 shadow-pop"
+          >
+            <div className="overline">Ton edge</div>
+            <div className="relative mt-3 h-3">
+              <div className="absolute inset-x-0 top-[2px] h-2 rounded-full bg-hairline" />
+              <div className="absolute left-[38%] top-[2px] h-2 w-[52%] rounded-full bg-accent/25" />
+              <div className="absolute left-[12%] top-[-2px] h-3 w-3 rounded-full border-[2.5px] border-white bg-accent shadow-soft" />
+            </div>
+            <div className="mt-[10px] font-mono text-xs text-accent-press">−62% vs cote</div>
+          </WidgetChip>
         </div>
       </div>
 
@@ -109,10 +122,8 @@ function LoginCard() {
 
   return (
     <div className="flex flex-1 items-center justify-center p-10">
-      <div className="flex w-[384px] animate-card-in flex-col gap-[14px] rounded-3xl border border-hairline bg-white p-8 shadow-pop">
-        <div className="font-display text-[26px] font-normal tracking-[-0.01em] text-ink">
-          Connexion
-        </div>
+      <div className="flex w-[384px] animate-card-in flex-col gap-[14px] rounded-card border border-hairline bg-white p-8 shadow-pop">
+        <div className="headline text-[26px] text-ink">Connexion</div>
         <div className="-mt-2 text-[13px] text-body">
           Reprends la chasse là où tu l&apos;as laissée.
         </div>
